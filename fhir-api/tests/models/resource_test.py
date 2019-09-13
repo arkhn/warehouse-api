@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 
 from models.resource import Resource
+from errors.operation_outcome import OperationOutcome
 
 
 @patch('models.resource.get_db_connection', autospec=True)
@@ -31,7 +32,7 @@ class TestResource:
 
     def test_init_without_id_nor_resource(self, mock_get_db_connection):
         """Raises an error if no id nor resource are provided"""
-        with pytest.raises(Exception, match='An id or a resource must be \
+        with pytest.raises(OperationOutcome, match='An id or a resource must be \
 provided'):
             r = Resource()
         assert mock_get_db_connection.call_count == 0
@@ -57,7 +58,7 @@ provided'):
     def test_create_missing_resource(self, mock_get_db_connection):
         """Raises an error when the resource data was not provided at init"""
         r = Resource(id='id')
-        with pytest.raises(Exception, match='Missing resource data to create \
+        with pytest.raises(OperationOutcome, match='Missing resource data to create \
 a Resource'):
             r = r.create()
         assert mock_get_db_connection.return_value.create.call_count == 0
@@ -68,7 +69,7 @@ a Resource'):
         test_id = {'id': 'id'}
         r = Resource(id=id, resource=resource_data)
 
-        with pytest.raises(Exception, match='Cannot create a resource with \
+        with pytest.raises(OperationOutcome, match='Cannot create a resource with \
 an ID'):
             r = r.create()
         assert mock_get_db_connection.return_value.create.call_count == 0
@@ -92,7 +93,7 @@ an ID'):
         """Raises an error when the id was not provided at init"""
         r = Resource(resource='test')
 
-        with pytest.raises(Exception, match='Resource ID is required'):
+        with pytest.raises(OperationOutcome, match='Resource ID is required'):
             r = r.read()
         assert mock_get_db_connection.return_value.read.call_count == 0
 
@@ -139,7 +140,7 @@ an ID'):
         """Raises an error when the resource was not provided"""
         r = Resource(resource='test')
 
-        with pytest.raises(Exception, match='Resource data is required to \
+        with pytest.raises(OperationOutcome, match='Resource data is required to \
 update a resource'):
             r = r.update(None)
         assert mock_get_db_connection.return_value.update.call_count == 0
@@ -175,7 +176,7 @@ update a resource'):
         test_id = {'id': 'id'}
         r = Resource(id=test_id['id'])
 
-        with pytest.raises(Exception, match='Patch data is required to \
+        with pytest.raises(OperationOutcome, match='Patch data is required to \
 patch a resource'):
             r = r.patch(None)
         assert mock_get_db_connection.return_value.update.call_count == 0
@@ -184,7 +185,7 @@ patch a resource'):
         """Raises an error when the resource id was not provided at init"""
         r = Resource(resource='test')
 
-        with pytest.raises(Exception, match='Resource ID is required to \
+        with pytest.raises(OperationOutcome, match='Resource ID is required to \
 patch a resource'):
             r = r.patch({'some': 'patch'})
         assert mock_get_db_connection.return_value.update.call_count == 0
@@ -209,7 +210,7 @@ patch a resource'):
         """
         r = Resource(resource='test')
 
-        with pytest.raises(Exception, match='Resource ID is required to delete \
+        with pytest.raises(OperationOutcome, match='Resource ID is required to delete \
 it'):
             r = r.delete()
         assert mock_get_db_connection.return_value.update.call_count == 0

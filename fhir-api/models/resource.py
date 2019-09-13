@@ -1,6 +1,7 @@
 import sys
 from flask import jsonify
 
+from errors.operation_outcome import OperationOutcome
 from db import get_db_connection
 
 
@@ -12,7 +13,7 @@ class Resource:
         The ID must be provided if the resource already exists.
         """
         if not resource and not id:
-            raise Exception('An id or a resource must be provided')
+            raise OperationOutcome('An id or a resource must be provided')
         self.db = get_db_connection()
         self.id = id
         self.resource = resource
@@ -27,9 +28,10 @@ class Resource:
     def create(self):
         """Creates a Resource instance in fhirbase."""
         if not self.resource:
-            raise Exception('Missing resource data to create a Resource')
+            raise OperationOutcome('Missing resource data \
+to create a Resource')
         if self.id:
-            raise Exception('Cannot create a resource with an ID')
+            raise OperationOutcome('Cannot create a resource with an ID')
 
         if self.resource.get('id'):
             del resource['id']
@@ -43,7 +45,7 @@ class Resource:
     def read(self):
         """Returns a Resource instance filled with the fhirbase data."""
         if not self.id:
-            raise Exception('Resource ID is required')
+            raise OperationOutcome('Resource ID is required')
 
         self.resource = self.db.read({
             'resourceType': self.resource_type,
@@ -55,7 +57,8 @@ class Resource:
         """Updates a Resource instance in fhirbase.
         If provided, resource.id must match self.id"""
         if not resource:
-            raise Exception('Resource data is required to update a resource')
+            raise OperationOutcome('Resource data is required \
+to update a resource')
         if not self.id:
             if resource.get('id'):
                 del resource['id']
@@ -66,7 +69,7 @@ class Resource:
             self.id = self.resource['id']
         else:
             if self.read().resource is None:
-                raise Exception(f'Resource {self.id} does not exist')
+                raise OperationOutcome(f'Resource {self.id} does not exist')
             self.resource = self.db.update({
                 'id': self.id,
                 'resourceType': self.resource_type,
@@ -77,9 +80,11 @@ class Resource:
     def patch(self, patch):
         """Performs a patch operation on a Resource instance in fhirbase."""
         if not patch:
-            raise Exception('Patch data is required to patch a resource')
+            raise OperationOutcome('Patch data is required \
+to patch a resource')
         if not self.id:
-            raise Exception('Resource ID is required to patch a resource')
+            raise OperationOutcome('Resource ID is required \
+to patch a resource')
 
         self.read()
         self.resource = self.db.update({
@@ -91,7 +96,7 @@ class Resource:
 
     def delete(self):
         if not self.id:
-            raise Exception('Resource ID is required to delete it')
+            raise OperationOutcome('Resource ID is required to delete it')
 
         self.resource = self.db.delete({
             'resourceType': self.resource_type,

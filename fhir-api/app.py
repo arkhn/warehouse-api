@@ -1,8 +1,9 @@
 import json
 
-from flask import Flask, Blueprint, abort, request, jsonify
+from flask import Flask, Blueprint, request, jsonify
 
 from models import resources_models
+from errors.operation_outcome import OperationOutcome
 
 api = Blueprint('api', __name__)
 
@@ -10,17 +11,12 @@ api = Blueprint('api', __name__)
 @api.route("/<resource_type>/<id>", methods=['GET'])
 def read(resource_type, id):
     if resource_type not in resources_models:
-        abort(404, 'Unknown resource type')
+        raise OperationOutcome('Unknown resource type')
 
     Model = resources_models[resource_type]
-    m = None
-    try:
-        m = Model(id).read()
-    except Exception as e:
-        abort(400, str(e))
-
+    m = Model(id).read()
     if not m.resource:
-        abort(404, f"No {resource_type} matching id {id}")
+        raise OperationOutcome(f"No {resource_type} matching id {id}")
 
     return m.json()
 
@@ -28,17 +24,14 @@ def read(resource_type, id):
 @api.route("/<resource_type>/<id>", methods=['PUT'])
 def update(resource_type, id):
     if resource_type not in resources_models:
-        abort(404, 'Unknown resource type')
+        raise OperationOutcome('Unknown resource type')
 
     Model = resources_models[resource_type]
-    m = None
-    try:
-        resource_data = request.get_json(force=True)
-        if resource_data.get('id') != id:
-            raise Exception('Resource id and update payload do not match')
-        m = Model(id).update(resource_data)
-    except Exception as e:
-        abort(400, str(e))
+    resource_data = request.get_json(force=True)
+    if resource_data.get('id') != id:
+        raise OperationOutcome('Resource id and update \
+payload do not match')
+    m = Model(id).update(resource_data)
 
     return m.json()
 
@@ -46,17 +39,14 @@ def update(resource_type, id):
 @api.route("/<resource_type>/<id>", methods=['PATCH'])
 def patch(resource_type, id):
     if resource_type not in resources_models:
-        abort(404, 'Unknown resource type')
+        raise OperationOutcome('Unknown resource type')
 
     Model = resources_models[resource_type]
-    m = None
-    try:
-        patch_data = request.get_json(force=True)
-        if patch_data.get('id') != id:
-            raise Exception('Resource id and update payload do not match')
-        m = Model(id).patch(patch_data)
-    except Exception as e:
-        abort(400, str(e))
+    patch_data = request.get_json(force=True)
+    if patch_data.get('id') != id:
+        raise OperationOutcome('Resource id and update \
+payload do not match')
+    m = Model(id).patch(patch_data)
 
     return m.json()
 
@@ -64,15 +54,11 @@ def patch(resource_type, id):
 @api.route("/<resource_type>", methods=['POST'])
 def create(resource_type):
     if resource_type not in resources_models:
-        abort(404, 'Unknown resource type')
+        raise OperationOutcome('Unknown resource type')
 
     Model = resources_models[resource_type]
-    m = None
-    try:
-        resource_data = request.get_json(force=True)
-        m = Model(resource=resource_data).create()
-    except Exception as e:
-        abort(400, str(e))
+    resource_data = request.get_json(force=True)
+    m = Model(resource=resource_data).create()
 
     return m.json()
 
@@ -80,14 +66,10 @@ def create(resource_type):
 @api.route("/<resource_type>/<id>", methods=['DELETE'])
 def delete(resource_type, id):
     if resource_type not in resources_models:
-        abort(404, 'Unknown resource type')
+        raise OperationOutcome('Unknown resource type')
 
     Model = resources_models[resource_type]
-    m = None
-    try:
-        m = Model(id=id).delete()
-    except Exception as e:
-        abort(400, str(e))
+    m = Model(id=id).delete()
 
     return m.json()
 
@@ -95,19 +77,20 @@ def delete(resource_type, id):
 @api.route("/<resource_type>", methods=['GET'])
 def search(resource_type):
     if resource_type not in resources_models:
-        abort(404, 'Unknown resource type')
+        raise OperationOutcome('Unknown resource type')
 
     Model = resources_models[resource_type]
-    results = None
-    try:
-        results = Model(id).search(request.args)
-    except Exception as e:
-        abort(400, str(e))
+    results = Model(id).search(request.args)
 
     if not results:
-        abort(404, f"No {resource_type} matching search criterias")
+        raise OperationOutcome(f"No {resource_type} matching search criterias")
 
     return jsonify(results)
+
+
+@api.errorhandler(OperationOutcome)
+def handle_bad_request(e):
+    return str(e), 400
 
 
 app = Flask(__name__)
