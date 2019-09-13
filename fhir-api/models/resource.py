@@ -1,3 +1,4 @@
+import sys
 from flask import jsonify
 
 from db import get_db_connection
@@ -98,6 +99,20 @@ class Resource:
         })
         self.id = None
         return self
+
+    def search(self, params):
+        query = f'SELECT * from {self.resource_type} r'
+        args = []
+        for param, value in params.items():
+            jsonb_path = f"{{ {param.replace('.', ',')} }}"
+            query += f' WHERE r.resource#>>%s = %s'
+            args.extend([jsonb_path, value])
+        with self.db.execute(query, params=args) as cursor:
+            print(' ----> QUERY PG :: ', cursor.query, flush=True)
+            iter_results = cursor.fetchall()
+
+            results = list(iter_results)
+            return results
 
     def history(self):
         pass

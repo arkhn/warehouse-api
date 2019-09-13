@@ -1,18 +1,18 @@
 import json
 
-from flask import Flask, Blueprint, abort, request
+from flask import Flask, Blueprint, abort, request, jsonify
 
-from models.resources import resources
+from models import resources_models
 
 api = Blueprint('api', __name__)
 
 
 @api.route("/<resource_type>/<id>", methods=['GET'])
 def read(resource_type, id):
-    if resource_type not in resources:
+    if resource_type not in resources_models:
         abort(404, 'Unknown resource type')
 
-    Model = resources[resource_type]
+    Model = resources_models[resource_type]
     m = None
     try:
         m = Model(id).read()
@@ -27,10 +27,10 @@ def read(resource_type, id):
 
 @api.route("/<resource_type>/<id>", methods=['PUT'])
 def update(resource_type, id):
-    if resource_type not in resources:
+    if resource_type not in resources_models:
         abort(404, 'Unknown resource type')
 
-    Model = resources[resource_type]
+    Model = resources_models[resource_type]
     m = None
     try:
         resource_data = request.get_json(force=True)
@@ -45,10 +45,10 @@ def update(resource_type, id):
 
 @api.route("/<resource_type>/<id>", methods=['PATCH'])
 def patch(resource_type, id):
-    if resource_type not in resources:
+    if resource_type not in resources_models:
         abort(404, 'Unknown resource type')
 
-    Model = resources[resource_type]
+    Model = resources_models[resource_type]
     m = None
     try:
         patch_data = request.get_json(force=True)
@@ -63,10 +63,10 @@ def patch(resource_type, id):
 
 @api.route("/<resource_type>", methods=['POST'])
 def create(resource_type):
-    if resource_type not in resources:
+    if resource_type not in resources_models:
         abort(404, 'Unknown resource type')
 
-    Model = resources[resource_type]
+    Model = resources_models[resource_type]
     m = None
     try:
         resource_data = request.get_json(force=True)
@@ -79,10 +79,10 @@ def create(resource_type):
 
 @api.route("/<resource_type>/<id>", methods=['DELETE'])
 def delete(resource_type, id):
-    if resource_type not in resources:
+    if resource_type not in resources_models:
         abort(404, 'Unknown resource type')
 
-    Model = resources[resource_type]
+    Model = resources_models[resource_type]
     m = None
     try:
         m = Model(id=id).delete()
@@ -90,6 +90,24 @@ def delete(resource_type, id):
         abort(400, str(e))
 
     return m.json()
+
+
+@api.route("/<resource_type>", methods=['GET'])
+def search(resource_type):
+    if resource_type not in resources_models:
+        abort(404, 'Unknown resource type')
+
+    Model = resources_models[resource_type]
+    results = None
+    try:
+        results = Model(id).search(request.args)
+    except Exception as e:
+        abort(400, str(e))
+
+    if not results:
+        abort(404, f"No {resource_type} matching search criterias")
+
+    return jsonify(results)
 
 
 app = Flask(__name__)
