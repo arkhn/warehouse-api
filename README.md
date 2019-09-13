@@ -4,15 +4,15 @@
 
 API of Arkhn's health data warehouse
 
-## Building the "fhir-api" service
+## Building the services
 
 ```bash
- docker build ./fhir-api -t arkhn/fhir-api
+ docker-compose build
 ```
 
 ## Running the stack
 
 ```bash
 docker-compose up
-# Open your browsher to http://localhost
+# Open your browser to http://localhost/api
 ```

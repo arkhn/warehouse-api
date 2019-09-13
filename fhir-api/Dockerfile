@@ -4,7 +4,8 @@ RUN apt-get clean \
     && apt-get -y update
     
 RUN apt-get -y install python3-dev \
-    && apt-get -y install build-essential
+    && apt-get -y install build-essential \
+    && apt-get -y install postgresql python-psycopg2 libpq-dev
 
 WORKDIR /srv/flask_app
 

@@ -11,6 +11,18 @@ services:
       - fhir
 
   fhir:
-    image: arkhn/fhir-api:latest
+    build:
+      context: ./fhir-api
+    environment:
+      FLASK_DEBUG: 1
+    volumes:
+      - ./fhir-api:/srv/flask_app
     ports:
       - 8081:8081
+      - 5000:5000
+
+  fhirbase:
+    image: fhirbase/fhirbase:latest
+    ports:
+      - 5432:5432
+      - 3000:3000
