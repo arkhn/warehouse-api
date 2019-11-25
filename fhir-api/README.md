@@ -1,3 +1,5 @@
+![](https://github.com/arkhn/warehouse-api/workflows/fhir-api/badge.svg)
+
 # fhir-api
 
 Implementation of a FHIR REST server API.

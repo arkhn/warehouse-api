@@ -5,13 +5,13 @@ from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 from models import resources_models
 
-api = Blueprint('api', __name__)
+api = Blueprint("api", __name__)
 
 
-@api.route("/<resource_type>/<id>", methods=['GET'])
+@api.route("/<resource_type>/<id>", methods=["GET"])
 def read(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome('Unknown resource type')
+        raise OperationOutcome("Unknown resource type")
 
     Model = resources_models[resource_type]
     try:
@@ -22,10 +22,10 @@ def read(resource_type, id):
     return m.json()
 
 
-@api.route("/<resource_type>/<id>", methods=['PUT'])
+@api.route("/<resource_type>/<id>", methods=["PUT"])
 def update(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome('Unknown resource type')
+        raise OperationOutcome("Unknown resource type")
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
@@ -38,10 +38,10 @@ def update(resource_type, id):
     return m.json()
 
 
-@api.route("/<resource_type>/<id>", methods=['PATCH'])
+@api.route("/<resource_type>/<id>", methods=["PATCH"])
 def patch(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome('Unknown resource type')
+        raise OperationOutcome("Unknown resource type")
 
     Model = resources_models[resource_type]
     patch_data = request.get_json(force=True)
@@ -54,10 +54,10 @@ def patch(resource_type, id):
     return m.json()
 
 
-@api.route("/<resource_type>", methods=['POST'])
+@api.route("/<resource_type>", methods=["POST"])
 def create(resource_type):
     if resource_type not in resources_models:
-        raise OperationOutcome('Unknown resource type')
+        raise OperationOutcome("Unknown resource type")
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
@@ -70,10 +70,10 @@ def create(resource_type):
     return m.json()
 
 
-@api.route("/<resource_type>/<id>", methods=['DELETE'])
+@api.route("/<resource_type>/<id>", methods=["DELETE"])
 def delete(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome('Unknown resource type')
+        raise OperationOutcome("Unknown resource type")
 
     Model = resources_models[resource_type]
     m = Model(id=id).delete()
@@ -81,10 +81,10 @@ def delete(resource_type, id):
     return m.json()
 
 
-@api.route("/<resource_type>", methods=['GET'])
+@api.route("/<resource_type>", methods=["GET"])
 def search(resource_type):
     if resource_type not in resources_models:
-        raise OperationOutcome('Unknown resource type')
+        raise OperationOutcome("Unknown resource type")
 
     Model = resources_models[resource_type]
     results = Model(id).search(request.args)

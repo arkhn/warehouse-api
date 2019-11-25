@@ -24,12 +24,10 @@ def get_db_connection():
     global connection
     if not connection:
         connection = pymongo.MongoClient(
-            host=DB_HOST,
-            port=int(DB_PORT),
-            username=DB_USER,
-            password=DB_PASSWORD
+            host=DB_HOST, port=int(DB_PORT), username=DB_USER, password=DB_PASSWORD
         )
     return connection
+
 
 # get_store initializes a new FHIRStore instance
 # it caches the resources loaded from the database in order

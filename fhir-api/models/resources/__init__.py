@@ -1,1 +1,1 @@
-from .patient import Patient
+from .patient import Patient  # noqa
