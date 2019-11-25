@@ -13,16 +13,25 @@ services:
   fhir:
     build:
       context: ./fhir-api
+    image: arkhn/fhir-api:latest
     environment:
-      FLASK_DEBUG: 1
+      DB_HOST: mongo
+      DB_PORT: 27017
     volumes:
       - ./fhir-api:/srv/flask_app
     ports:
       - 8081:8081
       - 5000:5000
 
-  fhirbase:
-    image: fhirbase/fhirbase:latest
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: fhirstore
     ports:
-      - 5432:5432
-      - 3000:3000
+      - 27017:27017
+    volumes:
+      - fhirstore-db:/data/db
+
+volumes:
+  fhirstore-db:

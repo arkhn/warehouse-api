@@ -1,9 +1,9 @@
-import json
+from flask import Blueprint, request, jsonify
+from jsonschema import ValidationError
 
-from flask import Flask, Blueprint, request, jsonify
-
-from models import resources_models
+from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
+from models import resources_models
 
 api = Blueprint('api', __name__)
 
@@ -14,8 +14,9 @@ def read(resource_type, id):
         raise OperationOutcome('Unknown resource type')
 
     Model = resources_models[resource_type]
-    m = Model(id).read()
-    if not m.resource:
+    try:
+        m = Model(id).read()
+    except NotFoundError:
         raise OperationOutcome(f"No {resource_type} matching id {id}")
 
     return m.json()
@@ -28,10 +29,11 @@ def update(resource_type, id):
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
-    if resource_data.get('id') != id:
-        raise OperationOutcome('Resource id and update \
-payload do not match')
-    m = Model(id).update(resource_data)
+
+    try:
+        m = Model(id).update(resource_data)
+    except ValidationError as e:
+        raise OperationOutcome(e.message)
 
     return m.json()
 
@@ -43,10 +45,11 @@ def patch(resource_type, id):
 
     Model = resources_models[resource_type]
     patch_data = request.get_json(force=True)
-    if patch_data.get('id') != id:
-        raise OperationOutcome('Resource id and update \
-payload do not match')
-    m = Model(id).patch(patch_data)
+
+    try:
+        m = Model(id).patch(patch_data)
+    except ValidationError as e:
+        raise OperationOutcome(e.message)
 
     return m.json()
 
@@ -58,7 +61,11 @@ def create(resource_type):
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
-    m = Model(resource=resource_data).create()
+
+    try:
+        m = Model(resource=resource_data).create()
+    except ValidationError as e:
+        raise OperationOutcome(e.message)
 
     return m.json()
 
@@ -91,9 +98,3 @@ def search(resource_type):
 @api.errorhandler(OperationOutcome)
 def handle_bad_request(e):
     return str(e), 400
-
-
-app = Flask(__name__)
-app.register_blueprint(api, url_prefix='/api')
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')

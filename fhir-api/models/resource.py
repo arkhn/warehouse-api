@@ -1,8 +1,10 @@
 import sys
+import uuid
 from flask import jsonify
+from bson.json_util import dumps
 
 from errors.operation_outcome import OperationOutcome
-from db import get_db_connection
+from db import get_store
 
 
 class Resource:
@@ -14,8 +16,8 @@ class Resource:
         """
         if not resource and not id:
             raise OperationOutcome('An id or a resource must be provided')
-        self.db = get_db_connection()
-        self.id = id
+        self.db = get_store()
+        self.id = id or resource.get('id')
         self.resource = resource
         self.resource_type = type(self).__name__
 
@@ -26,98 +28,70 @@ class Resource:
         return jsonify({'id': self.id})
 
     def create(self):
-        """Creates a Resource instance in fhirbase."""
+        """Creates a Resource instance in fhirstore."""
         if not self.resource:
             raise OperationOutcome('Missing resource data \
 to create a Resource')
-        if self.id:
+        if self.id or self.resource.get('id'):
             raise OperationOutcome('Cannot create a resource with an ID')
 
-        if self.resource.get('id'):
-            del resource['id']
+        self.id = str(uuid.uuid4())
         self.resource = self.db.create({
-            'resourceType': self.resource_type,
-            **self.resource
-        })
-        self.id = self.resource['id']
-        return self
-
-    def read(self):
-        """Returns a Resource instance filled with the fhirbase data."""
-        if not self.id:
-            raise OperationOutcome('Resource ID is required')
-
-        self.resource = self.db.read({
+            **self.resource,
             'resourceType': self.resource_type,
             'id': self.id
         })
         return self
 
+    def read(self):
+        """Returns a Resource instance filled with the fhirstore data."""
+        if not self.id:
+            raise OperationOutcome('Resource ID is required')
+
+        self.resource = self.db.read(self.resource_type, self.id)
+        return self
+
     def update(self, resource):
-        """Updates a Resource instance in fhirbase.
+        """Updates a Resource instance in fhirstore.
         If provided, resource.id must match self.id"""
         if not resource:
             raise OperationOutcome('Resource data is required \
 to update a resource')
         if not self.id:
-            if resource.get('id'):
-                del resource['id']
-            self.resource = self.db.create({
-                'resourceType': self.resource_type,
-                **resource
-            })
-            self.id = self.resource['id']
-        else:
-            if self.read().resource is None:
-                raise OperationOutcome(f'Resource {self.id} does not exist')
-            self.resource = self.db.update({
-                'id': self.id,
-                'resourceType': self.resource_type,
-                **resource
-            })
+            raise OperationOutcome('Resource ID is required')
+        if resource.get('id') and resource.get('id') != self.id:
+            raise OperationOutcome('Resource id and update \
+payload do not match')
+
+        self.resource = self.db.update(self.resource_type, self.id, resource)
         return self
 
     def patch(self, patch):
-        """Performs a patch operation on a Resource instance in fhirbase."""
+        """Performs a patch operation on a Resource instance in fhirstore.
+        If provided, patch.id must match self.id"""
         if not patch:
             raise OperationOutcome('Patch data is required \
 to patch a resource')
         if not self.id:
             raise OperationOutcome('Resource ID is required \
 to patch a resource')
+        if patch.get('id') is not None and patch.get('id') != self.id:
+            raise OperationOutcome('Resource id and patch \
+payload do not match')
 
-        self.read()
-        self.resource = self.db.update({
-            'resourceType': self.resource_type,
-            **self.resource,
-            **patch
-        })
+        self.resource = self.db.patch(self.resource_type, self.id, patch)
         return self
 
     def delete(self):
         if not self.id:
             raise OperationOutcome('Resource ID is required to delete it')
 
-        self.resource = self.db.delete({
-            'resourceType': self.resource_type,
-            'id': self.id
-        })
+        self.resource = self.db.delete(self.resource_type, self.id)
         self.id = None
         return self
 
     def search(self, params):
-        query = f'SELECT * from {self.resource_type} r'
-        args = []
-        for param, value in params.items():
-            jsonb_path = f"{{ {param.replace('.', ',')} }}"
-            query += f' WHERE r.resource#>>%s = %s'
-            args.extend([jsonb_path, value])
-        with self.db.execute(query, params=args) as cursor:
-            print(' ----> QUERY PG :: ', cursor.query, flush=True)
-            iter_results = cursor.fetchall()
-
-            results = list(iter_results)
-            return results
+        pass
 
     def history(self):
         pass
