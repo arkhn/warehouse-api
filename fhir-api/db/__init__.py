@@ -47,6 +47,8 @@ def get_store():
         store = fhirstore.FHIRStore(connection, DB_NAME)
         if not cached_resources:
             store.resume()
+            if len(store.resources) == 0:
+                store.bootstrap(depth=3)
             cached_resources = store.resources
         else:
             store.resources = cached_resources
