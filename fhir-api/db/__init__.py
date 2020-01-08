@@ -48,7 +48,7 @@ def get_store():
         if not cached_resources:
             store.resume()
             if len(store.resources) == 0:
-                store.bootstrap(depth=3)
+                store.bootstrap(depth=5)
             cached_resources = store.resources
         else:
             store.resources = cached_resources
