@@ -4,6 +4,7 @@ from jsonschema import ValidationError
 from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 from models import resources_models
+from subsearch.search import sub_search
 
 api = Blueprint("api", __name__)
 
@@ -86,8 +87,12 @@ def search(resource_type):
     if resource_type not in resources_models:
         raise OperationOutcome("Unknown resource type")
 
+    search_args = {key: request.args.getlist(key) for key in request.args.keys()}
+
+    parsed_params = sub_search(search_args)
+
     Model = resources_models[resource_type]
-    results = Model(id).search(request.args)
+    results = Model(id).search(parsed_params)
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")

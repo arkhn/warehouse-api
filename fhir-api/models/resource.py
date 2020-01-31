@@ -99,7 +99,10 @@ payload do not match"
         return self
 
     def search(self, params):
-        pass
+        """Searchs a resource by calling fhirstore search function
+        """
+        results = self.db.search(self.resource_type, params)
+        return results
 
     def history(self):
         pass

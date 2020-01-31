@@ -15,7 +15,7 @@ class JSONEncoder(json.JSONEncoder):
 
 def create_app():
     app = Flask(__name__)
-    app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(api, url_prefix="/api")
     app.json_encoder = JSONEncoder
 
     # load fhirstore at application startup
@@ -26,6 +26,6 @@ def create_app():
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host="0.0.0.0")

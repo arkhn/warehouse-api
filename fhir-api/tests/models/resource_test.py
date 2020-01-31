@@ -88,7 +88,9 @@ an ID",
         r = Resource(id=test_id["id"])
 
         r = r.read()
-        mock_get_store.return_value.read.assert_called_once_with("Resource", test_id["id"])
+        mock_get_store.return_value.read.assert_called_once_with(
+            "Resource", test_id["id"]
+        )
         assert r.resource == read_ret_data
 
     def test_read_missing_id(self, mock_get_store):
@@ -209,7 +211,9 @@ patch a resource",
         r = Resource(id=test_id["id"])
 
         r = r.delete()
-        mock_get_store.return_value.delete.assert_called_once_with("Resource", test_id["id"])
+        mock_get_store.return_value.delete.assert_called_once_with(
+            "Resource", test_id["id"]
+        )
         assert r.resource is None
         assert r.id is None
 
