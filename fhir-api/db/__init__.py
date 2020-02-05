@@ -11,11 +11,12 @@ cached_resources = None
 DB_NAME = os.getenv("DB_NAME", "fhirstore")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "27017")
-DB_USER = os.getenv("MONGO_USERNAME")
-DB_PASSWORD = os.getenv("CLIENT_PASSWORD")
-ES_TARGET = os.getenv("ES_TARGET", "http://localhost:9200")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+ES_HOST = os.getenv("ES_HOST", "http://localhost:9200")
 ES_USER = os.getenv("ES_USER")
-ES_PASSWORD = os.getenv("CLIENT_PASSWORD")
+ES_PASSWORD = os.getenv("ES_PASSWORD")
 
 
 def reset_db_connection():
@@ -39,9 +40,7 @@ def get_db_connection():
 def get_es_connection():
     global connection_es
     if not connection_es:
-        connection_es = elasticsearch.Elasticsearch(
-            [ES_TARGET], http_auth=(ES_USER, ES_PASSWORD)
-        )
+        connection_es = elasticsearch.Elasticsearch([ES_HOST], http_auth=(ES_USER, ES_PASSWORD))
     return connection_es
 
 

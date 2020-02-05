@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   reverse-proxy:
@@ -16,12 +16,11 @@ services:
     image: arkhn/fhir-api:latest
     container_name: fhir-api
     env_file:
-      - .env.docker
+      - fhir-api/.env.docker
     volumes:
       - ./fhir-api:/srv/flask_app
     ports:
-      - 8081:8081
-      - 5000:5000
+      - 2000:2000
 
   mongo:
     image: mongo
@@ -36,7 +35,6 @@ services:
     volumes:
       - fhirstore-db:/data/db
     command: --replSet rs0
-
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.4.1
