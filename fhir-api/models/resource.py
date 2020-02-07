@@ -98,10 +98,10 @@ payload do not match"
         self.id = None
         return self
 
-    def search(self, params):
+    def search(self, params, offset=0, result_size=100):
         """Searchs a resource by calling fhirstore search function
         """
-        results = self.db.search(self.resource_type, params)
+        results = self.db.search(self.resource_type, params, offset, result_size)
         return results
 
     def history(self):

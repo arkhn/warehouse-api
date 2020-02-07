@@ -5,6 +5,7 @@ from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 from models import resources_models
 from subsearch.search import sub_search
+import elasticsearch
 
 api = Blueprint("api", __name__)
 
@@ -90,9 +91,22 @@ def search(resource_type):
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
 
     parsed_params = sub_search(search_args)
+    offset = 0
+    total = 100
 
+    if parsed_params["_count"]:
+        # Here _count is removed from the arguments to parse
+        # because it needs to exist outside the search query in elasticsearch
+        total = parsed_params.pop("_count")[0]
     Model = resources_models[resource_type]
-    results = Model(id).search(parsed_params)
+    try:
+        results = Model(id).search(parsed_params, offset, total)
+    except elasticsearch.exceptions.NotFoundError as e:
+        raise OperationOutcome(e)
+    except elasticsearch.exceptions.RequestError as e:
+        raise OperationOutcome(e)
+    except elasticsearch.exceptions.AuthenticationException as e:
+        raise OperationOutcome(e)
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
