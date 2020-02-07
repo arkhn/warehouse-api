@@ -14,27 +14,32 @@ API of Arkhn's health data warehouse
 
 ```bash
 docker-compose up
+# wait for mongo to be up and running...
+env $(cat fhir-api/.env) ./scripts/initiate_rep_set.sh
 # Open your browser to http://localhost/api
 ```
 
 ## Usage
 
 ### Create a resource
-`POST http://localhost/api/<resource_type>` 
+
+`POST http://localhost/api/<resource_type>`
 
 `<resource_type>`: eg: Patient, Organization...
 
 `BODY`: resource data in JSON
 
 ### Read a resource
-`GET http://localhost/api/<resource_type>/<id>` 
+
+`GET http://localhost/api/<resource_type>/<id>`
 
 `<resource_type>`: eg: Patient, Organization...
 
 `<id>`: logical id of the resource
 
 ### Update a resource
-`PUT http://localhost/api/<resource_type>/<id>` 
+
+`PUT http://localhost/api/<resource_type>/<id>`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -43,14 +48,16 @@ docker-compose up
 `BODY`: resource data in JSON
 
 ### Delete a resource
-`DELETE http://localhost/api/<resource_type>/<id>` 
+
+`DELETE http://localhost/api/<resource_type>/<id>`
 
 `<resource_type>`: eg: Patient, Organization...
 
 `<id>`: logical id of the resource
 
 ### Patch a resource (partial update)
-`PATCH http://localhost/api/<resource_type>` 
+
+`PATCH http://localhost/api/<resource_type>`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -60,9 +67,9 @@ docker-compose up
 
 ### Search a resource
 
-*Search is a work in progress, only works with strings right now*
+_Search is a work in progress, only works with strings right now_
 
-`GET http://localhost/api/<resource_type>?[parameter1=value1][&parameter2=value2]...` 
+`GET http://localhost/api/<resource_type>?[parameter1=value1][&parameter2=value2]...`
 
 `<resource_type>`: eg: Patient, Organization...
 

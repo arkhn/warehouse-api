@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 
 services:
   reverse-proxy:
@@ -9,6 +9,8 @@ services:
       - 80:80
     depends_on:
       - fhir
+    networks:
+      - arkhn
 
   fhir:
     build:
@@ -21,6 +23,8 @@ services:
       - ./fhir-api:/srv/flask_app
     ports:
       - 2000:2000
+    networks:
+      - arkhn
 
   mongo:
     image: mongo
@@ -35,6 +39,8 @@ services:
     volumes:
       - fhirstore-db:/data/db
     command: --replSet rs0
+    networks:
+      - arkhn
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.4.1
@@ -46,6 +52,8 @@ services:
     volumes:
       - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       - esdata:/usr/share/elasticsearch/data
+    networks:
+      - arkhn
 
   monstache:
     image: rwynn/monstache:6.2.5
@@ -57,8 +65,14 @@ services:
     depends_on:
       - mongo
       - elasticsearch
+    networks:
+      - arkhn
 
 volumes:
   fhirstore-db:
   esdata:
     driver: local
+
+networks:
+  arkhn:
+    name: arkhn_network

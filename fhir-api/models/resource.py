@@ -1,6 +1,7 @@
 import uuid
 from flask import jsonify
 
+from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 from db import get_store
 
@@ -28,14 +29,16 @@ class Resource:
     def create(self):
         """Creates a Resource instance in fhirstore."""
         if not self.resource:
-            raise OperationOutcome(
-                "Missing resource data \
-to create a Resource"
-            )
-        if self.id or self.resource.get("id"):
-            raise OperationOutcome("Cannot create a resource with an ID")
+            raise OperationOutcome("Missing resource data to create a Resource")
 
-        self.id = str(uuid.uuid4())
+        self.id = self.id or str(uuid.uuid4())
+
+        try:
+            if self.db.read(self.resource_type, self.id):
+                raise OperationOutcome(f"Resource {self.id} already exist")
+        except NotFoundError:
+            pass
+
         self.resource = self.db.create(
             {**self.resource, "resourceType": self.resource_type, "id": self.id}
         )
@@ -53,17 +56,11 @@ to create a Resource"
         """Updates a Resource instance in fhirstore.
         If provided, resource.id must match self.id"""
         if not resource:
-            raise OperationOutcome(
-                "Resource data is required \
-to update a resource"
-            )
+            raise OperationOutcome("Resource data is required to update a resource")
         if not self.id:
             raise OperationOutcome("Resource ID is required")
         if resource.get("id") and resource.get("id") != self.id:
-            raise OperationOutcome(
-                "Resource id and update \
-payload do not match"
-            )
+            raise OperationOutcome("Resource id and update payload do not match")
 
         self.resource = self.db.update(self.resource_type, self.id, resource)
         return self
@@ -72,20 +69,11 @@ payload do not match"
         """Performs a patch operation on a Resource instance in fhirstore.
         If provided, patch.id must match self.id"""
         if not patch:
-            raise OperationOutcome(
-                "Patch data is required \
-to patch a resource"
-            )
+            raise OperationOutcome("Patch data is required to patch a resource")
         if not self.id:
-            raise OperationOutcome(
-                "Resource ID is required \
-to patch a resource"
-            )
+            raise OperationOutcome("Resource ID is required to patch a resource")
         if patch.get("id") is not None and patch.get("id") != self.id:
-            raise OperationOutcome(
-                "Resource id and patch \
-payload do not match"
-            )
+            raise OperationOutcome("Resource id and patch payload do not match")
 
         self.resource = self.db.patch(self.resource_type, self.id, patch)
         return self

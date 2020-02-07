@@ -46,6 +46,7 @@ be provided",
         resource_data = {"my": "resource"}
         create_ret_data = {**resource_data, "_id": "0541"}
         mock_get_store.return_value.create.return_value = create_ret_data
+        mock_get_store.return_value.read.return_value = None
         r = Resource(resource=resource_data)
 
         r = r.create()
@@ -58,24 +59,31 @@ be provided",
     def test_create_missing_resource(self, mock_get_store):
         """Raises an error when the resource data was not provided at init"""
         r = Resource(id="id")
-        with pytest.raises(
-            OperationOutcome,
-            match="Missing resource data to create \
-a Resource",
-        ):
+        with pytest.raises(OperationOutcome, match="Missing resource data to create a Resource"):
             r = r.create()
         assert mock_get_store.return_value.create.call_count == 0
 
     def test_create_extra_id(self, mock_get_store):
-        """Raises an error when the resource data and an id were provided"""
-        resource_data = {"my": "resource"}
-        r = Resource(id=id, resource=resource_data)
+        """Accepts the resource data when an id was provided"""
+        resource_data = {"my": "resource", "id": "test"}
+        create_ret_data = {**resource_data, "_id": "0541"}
+        mock_get_store.return_value.create.return_value = create_ret_data
+        mock_get_store.return_value.read.return_value = None
+        r = Resource(resource=resource_data)
 
-        with pytest.raises(
-            OperationOutcome,
-            match="Cannot create a resource with \
-an ID",
-        ):
+        r = r.create()
+        assert r.id == "test"
+        assert r.resource == create_ret_data
+
+    def test_create_already_exist(self, mock_get_store):
+        """Accepts the resource data when an id was provided"""
+        resource_data = {"my": "resource", "id": "test"}
+        create_ret_data = {**resource_data, "_id": "0541"}
+        mock_get_store.return_value.create.return_value = create_ret_data
+        mock_get_store.return_value.read.return_value = {"id": "test"}
+        r = Resource(resource=resource_data)
+
+        with pytest.raises(OperationOutcome, match="Resource test already exist"):
             r = r.create()
         assert mock_get_store.return_value.create.call_count == 0
 
@@ -88,9 +96,7 @@ an ID",
         r = Resource(id=test_id["id"])
 
         r = r.read()
-        mock_get_store.return_value.read.assert_called_once_with(
-            "Resource", test_id["id"]
-        )
+        mock_get_store.return_value.read.assert_called_once_with("Resource", test_id["id"])
         assert r.resource == read_ret_data
 
     def test_read_missing_id(self, mock_get_store):
@@ -211,9 +217,7 @@ patch a resource",
         r = Resource(id=test_id["id"])
 
         r = r.delete()
-        mock_get_store.return_value.delete.assert_called_once_with(
-            "Resource", test_id["id"]
-        )
+        mock_get_store.return_value.delete.assert_called_once_with("Resource", test_id["id"])
         assert r.resource is None
         assert r.id is None
 

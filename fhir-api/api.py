@@ -94,10 +94,10 @@ def search(resource_type):
     offset = 0
     total = 100
 
-    if parsed_params["_count"]:
+    if parsed_params.get("_count"):
         # Here _count is removed from the arguments to parse
         # because it needs to exist outside the search query in elasticsearch
-        total = parsed_params.pop("_count")[0]
+        total = int(parsed_params.pop("_count")[0])
     Model = resources_models[resource_type]
     try:
         results = Model(id).search(parsed_params, offset, total)

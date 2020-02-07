@@ -17,9 +17,7 @@ class TestDB(TestCase):
     def tearDown(self):
         reset_db_connection()
 
-    def test_get_db_connection_once(
-        self, mock_es_client, mock_mongo_client, mock_fhirstore
-    ):
+    def test_get_db_connection_once(self, mock_es_client, mock_mongo_client, mock_fhirstore):
         """Initializes a pymongo.MongoClient."""
         assert mock_mongo_client.call_count == 0
 
@@ -27,9 +25,7 @@ class TestDB(TestCase):
         assert mock_mongo_client.call_count == 1
         assert client == mock_mongo_client.return_value
 
-    def test_get_db_connection_twice(
-        self, mock_es_client, mock_mongo_client, mock_fhirstore
-    ):
+    def test_get_db_connection_twice(self, mock_es_client, mock_mongo_client, mock_fhirstore):
         """Calling get_db_connection twice returns the same connection."""
         assert mock_mongo_client.call_count == 0
 
@@ -41,9 +37,7 @@ class TestDB(TestCase):
         assert mock_mongo_client.call_count == 1
         assert client == mock_mongo_client.return_value
 
-    def test_get_es_connection_once(
-        self, mock_es_client, mock_mongo_client, mock_fhirstore
-    ):
+    def test_get_es_connection_once(self, mock_es_client, mock_mongo_client, mock_fhirstore):
         """Initializes a elasticSearch.Elasticsearch"""
         assert mock_es_client.call_count == 0
 
@@ -51,9 +45,7 @@ class TestDB(TestCase):
         assert mock_es_client.call_count == 1
         assert client_es == mock_es_client.return_value
 
-    def test_get_es_connection_twice(
-        self, mock_es_client, mock_mongo_client, mock_fhirstore
-    ):
+    def test_get_es_connection_twice(self, mock_es_client, mock_mongo_client, mock_fhirstore):
         """Calling get_es_connection twice returns the same connection."""
         assert mock_es_client.call_count == 0
 
@@ -76,9 +68,7 @@ class TestDB(TestCase):
         )
         assert store == mock_fhirstore.return_value
 
-    def test_get_db_store_twice(
-        self, mock_es_client, mock_mongo_client, mock_fhirstore
-    ):
+    def test_get_db_store_twice(self, mock_es_client, mock_mongo_client, mock_fhirstore):
         """Calling get_store twice returns the same connection."""
         assert mock_fhirstore.call_count == 0
         assert mock_es_client.call_count == 0
