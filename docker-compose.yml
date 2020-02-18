@@ -29,6 +29,7 @@ services:
   mongo:
     image: mongo
     container_name: mongo
+    hostname: mongo
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: arkhn
@@ -38,6 +39,7 @@ services:
       - 27017:27017
     volumes:
       - fhirstore-db:/data/db
+      - fhirstore-config-db:/data/configdb
     command: --replSet rs0
     networks:
       - arkhn
@@ -70,6 +72,7 @@ services:
 
 volumes:
   fhirstore-db:
+  fhirstore-config-db:
   esdata:
     driver: local
 

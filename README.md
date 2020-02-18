@@ -15,15 +15,15 @@ API of Arkhn's health data warehouse
 ```bash
 docker-compose up
 # wait for mongo to be up and running...
-env $(cat fhir-api/.env) ./scripts/initiate_rep_set.sh
-# Open your browser to http://localhost/api
+env $(cat fhir-api/.env) fhir-api/scripts/initiate_rep_set.sh
+# Open your browser to http://localhost
 ```
 
 ## Usage
 
 ### Create a resource
 
-`POST http://localhost/api/<resource_type>`
+`POST http://localhost/<resource_type>`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -31,7 +31,7 @@ env $(cat fhir-api/.env) ./scripts/initiate_rep_set.sh
 
 ### Read a resource
 
-`GET http://localhost/api/<resource_type>/<id>`
+`GET http://localhost/<resource_type>/<id>`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -39,7 +39,7 @@ env $(cat fhir-api/.env) ./scripts/initiate_rep_set.sh
 
 ### Update a resource
 
-`PUT http://localhost/api/<resource_type>/<id>`
+`PUT http://localhost/<resource_type>/<id>`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -49,7 +49,7 @@ env $(cat fhir-api/.env) ./scripts/initiate_rep_set.sh
 
 ### Delete a resource
 
-`DELETE http://localhost/api/<resource_type>/<id>`
+`DELETE http://localhost/<resource_type>/<id>`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -57,7 +57,7 @@ env $(cat fhir-api/.env) ./scripts/initiate_rep_set.sh
 
 ### Patch a resource (partial update)
 
-`PATCH http://localhost/api/<resource_type>`
+`PATCH http://localhost/<resource_type>`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -69,7 +69,7 @@ env $(cat fhir-api/.env) ./scripts/initiate_rep_set.sh
 
 _Search is a work in progress, only works with strings right now_
 
-`GET http://localhost/api/<resource_type>?[parameter1=value1][&parameter2=value2]...`
+`GET http://localhost/<resource_type>?[parameter1=value1][&parameter2=value2]...`
 
 `<resource_type>`: eg: Patient, Organization...
 
@@ -79,6 +79,6 @@ _Search is a work in progress, only works with strings right now_
 
 `valueN`: exact match of the extracted fhir attribute
 
-_Example (gets all patients)_: `GET http://localhost/api/Patient`
+_Example (gets all patients)_: `GET http://localhost/Patient`
 
-_Example (gets a patient by family name)_: `GET http://localhost/api/Patient?name.0.family=Bins636`
+_Example (gets a patient by family name)_: `GET http://localhost/Patient?name.0.family=Bins636`

@@ -3,7 +3,8 @@ FROM alpine:3.10
 RUN apk update
 
 RUN apk add --no-cache \
-    uwsgi-python3 \
+    build-base \
+    linux-headers \
     python3-dev \
     bash
 

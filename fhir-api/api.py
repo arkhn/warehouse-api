@@ -6,8 +6,12 @@ from errors.operation_outcome import OperationOutcome
 from models import resources_models
 from subsearch.search import sub_search
 import elasticsearch
+from flask_cors import CORS
 
 api = Blueprint("api", __name__)
+# enable Cross-Origin Resource Sharing
+# "Allow-Control-Allow-Origin" HTTP header
+CORS(api)
 
 
 @api.route("/<resource_type>/<id>", methods=["GET"])
