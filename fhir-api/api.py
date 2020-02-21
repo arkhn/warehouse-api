@@ -4,7 +4,12 @@ from jsonschema import ValidationError
 from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 from models import resources_models
-from subsearch.search import sub_search
+from subsearch.search import (
+    sub_search,
+    result_params,
+    error_handler_count,
+    error_handler_search,
+)
 import elasticsearch
 
 api = Blueprint("api", __name__)
@@ -92,21 +97,14 @@ def search(resource_type):
 
     parsed_params = sub_search(search_args)
     offset = 0
-    total = 100
+    processed_params, total, elements, count = result_params(parsed_params)
 
-    if parsed_params.get("_count"):
-        # Here _count is removed from the arguments to parse
-        # because it needs to exist outside the search query in elasticsearch
-        total = int(parsed_params.pop("_count")[0])
     Model = resources_models[resource_type]
-    try:
-        results = Model(id).search(parsed_params, offset, total)
-    except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(e)
-    except elasticsearch.exceptions.RequestError as e:
-        raise OperationOutcome(e)
-    except elasticsearch.exceptions.AuthenticationException as e:
-        raise OperationOutcome(e)
+
+    if count:
+        results = error_handler_count(Model, processed_params)
+    else:
+        results = error_handler_search(Model, processed_params, offset, total, elements)
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
