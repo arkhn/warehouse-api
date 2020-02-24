@@ -1,11 +1,9 @@
 from collections import defaultdict
-from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 import elasticsearch
 
 
 def parse_comma(key, value):
-
     has_comma = "," in value
     if has_comma:
         return "multiple", {key: value.split(",")}
@@ -13,7 +11,7 @@ def parse_comma(key, value):
         return key, [value]
 
 
-def sub_search(search_args):
+def parse_params(search_args):
     parsed_params = defaultdict(list)
 
     if search_args == {}:
@@ -33,35 +31,51 @@ def sub_search(search_args):
     return parsed_params
 
 
-def result_params(parsed_params):
-    total = 100
+def clean_params(parsed_params):
+    if parsed_params.get("multiple"):
+        parsed_params["multiple"].pop("_element", None)
+    if parsed_params.get("multiple") == {}:
+        parsed_params = {}
+
+    parsed_params.pop("_summary", None)
+    parsed_params.pop("_element", None)
+    return parsed_params
+
+
+def process_params(search_args):
+
+    parsed_params = parse_params(search_args)
+
+    offset = 0
     elements = None
-    count = None
-    if parsed_params.get("_count"):
-        total = int(parsed_params.pop("_count")[0])
 
-    if parsed_params.get("_element"):
+    result_size = parsed_params.pop("_count", None)
+    total = int(result_size[0]) if result_size else 100
+    count = (
+        True
+        if parsed_params.get("_summary") and parsed_params["_summary"][0] == "count"
+        else False
+    )
+
+    if parsed_params.get("_summary") and parsed_params["_summary"][0] == "text":
+        elements = ["text", "id", "meta"]
+    elif parsed_params.get("_element"):
         elements = parsed_params.pop("_element")
-    elif parsed_params.get("multiple") and parsed_params["multiple"].get("_element"):
-        elements = parsed_params["multiple"].pop("_element")
+    elif parsed_params.get("multiple"):
+        elements = parsed_params["multiple"].pop("_element", None)
 
-    if parsed_params.get("_summary"):
-        if parsed_params["_summary"] == "false":
-            parsed_params.pop("_summary")
-        elif parsed_params["_summary"] == "text":
-            parsed_params.pop("_summary")
-            elements = ["text", "id", "meta"]
-        elif parsed_params["_summary"] == "count":
-            count = True
+    cleaned_params = clean_params(parsed_params)
 
-    return parsed_params, total, elements, count
+    return cleaned_params, total, elements, count, offset
 
 
 def error_handler_count(Model, processed_params):
     try:
         return Model(id).count(processed_params)
     except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(e)
+        raise OperationOutcome(
+            f"{e.info['error']['index']} is not indexed in the database yet."
+        )
     except elasticsearch.exceptions.RequestError as e:
         raise OperationOutcome(e)
     except elasticsearch.exceptions.AuthenticationException as e:
@@ -72,7 +86,9 @@ def error_handler_search(Model, processed_params, offset, total, elements):
     try:
         return Model(id).search(processed_params, offset, total, elements)
     except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(e)
+        raise OperationOutcome(
+            f"{e.info['error']['index']} is not indexed in the database yet."
+        )
     except elasticsearch.exceptions.RequestError as e:
         raise OperationOutcome(e)
     except elasticsearch.exceptions.AuthenticationException as e:

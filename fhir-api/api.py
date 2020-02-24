@@ -5,8 +5,7 @@ from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 from models import resources_models
 from subsearch.search import (
-    sub_search,
-    result_params,
+    process_params,
     error_handler_count,
     error_handler_search,
 )
@@ -95,10 +94,7 @@ def search(resource_type):
 
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
 
-    parsed_params = sub_search(search_args)
-    offset = 0
-    processed_params, total, elements, count = result_params(parsed_params)
-
+    processed_params, total, elements, count, offset = process_params(search_args)
     Model = resources_models[resource_type]
 
     if count:
@@ -108,7 +104,6 @@ def search(resource_type):
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
-
     return jsonify(results)
 
 
