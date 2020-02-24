@@ -41,8 +41,8 @@ class TestSearch:
         )
         assert parsed_params == {}
         assert total == 100
-        assert elements == None
-        assert count == True
+        assert elements is None
+        assert count is True
 
     def test_text_summary(self):
         parsed_params, total, elements, count, offset = process_params(
@@ -51,7 +51,7 @@ class TestSearch:
         assert parsed_params == {}
         assert total == 100
         assert elements == ["text", "id", "meta"]
-        assert count == False
+        assert count is False
 
     def test_element(self):
         parsed_params, total, elements, count, offset = process_params(
@@ -60,7 +60,7 @@ class TestSearch:
         assert parsed_params == {}
         assert total == 100
         assert elements == ["birthDate"]
-        assert count == False
+        assert count is False
 
     def test_elements(self):
         parsed_params, total, elements, count, offset = process_params(
@@ -69,7 +69,7 @@ class TestSearch:
         assert parsed_params == {}
         assert total == 100
         assert elements == ["birthDate", "gender"]
-        assert count == False
+        assert count is False
         assert offset == 0
 
     def test_display_size(self):
@@ -78,8 +78,8 @@ class TestSearch:
         )
         assert parsed_params == {}
         assert total == 2
-        assert elements == None
-        assert count == False
+        assert elements is None
+        assert count is False
         assert offset == 0
 
     def test_result_parameters(self):
@@ -89,7 +89,7 @@ class TestSearch:
         assert parsed_params == {}
         assert total == 2
         assert elements == ["birthDate", "name"]
-        assert count == False
+        assert count is False
         assert offset == 0
 
     def test_mix_parameters(self):
@@ -107,18 +107,18 @@ class TestSearch:
         }
         assert total == 200
         assert elements == ["text", "id", "meta"]
-        assert count == False
+        assert count is False
         assert offset == 0
 
     def test_mix_params_count(self):
         parsed_params, total, elements, count, offset = process_params(
-            {"language": ["FR", "EN,NL"], "_summary": ["count"],}
+            {"language": ["FR", "EN,NL"], "_summary": ["count"]}
         )
         assert parsed_params == {
             "language": ["FR"],
             "multiple": {"language": ["EN", "NL"]},
         }
         assert total == 100
-        assert elements == None
-        assert count == True
+        assert elements is None
+        assert count is True
         assert offset == 0

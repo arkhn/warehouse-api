@@ -9,7 +9,6 @@ from subsearch.search import (
     error_handler_count,
     error_handler_search,
 )
-import elasticsearch
 
 api = Blueprint("api", __name__)
 
