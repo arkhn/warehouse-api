@@ -84,7 +84,7 @@ class TestSearch:
 
     def test_result_parameters(self):
         parsed_params, total, elements, count, offset = process_params(
-            {"_count": ["2"], "_summary": ["False"], "_element": ["birthDate,name"],}
+            {"_count": ["2"], "_summary": ["False"], "_element": ["birthDate,name"]}
         )
         assert parsed_params == {}
         assert total == 2
