@@ -6,8 +6,8 @@ from errors.operation_outcome import OperationOutcome
 from models import resources_models
 from subsearch.search import (
     process_params,
-    error_handler_count,
-    error_handler_search,
+    count_model,
+    search_model,
 )
 
 api = Blueprint("api", __name__)
@@ -93,13 +93,13 @@ def search(resource_type):
 
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
 
-    processed_params, total, elements, count, offset = process_params(search_args)
+    processed_params, result_size, elements, is_summary_count, offset = process_params(search_args)
     Model = resources_models[resource_type]
 
-    if count:
-        results = error_handler_count(Model, processed_params)
+    if is_summary_count:
+        results = count_model(Model, processed_params)
     else:
-        results = error_handler_search(Model, processed_params, offset, total, elements)
+        results = search_model(Model, processed_params, offset, result_size, elements)
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")

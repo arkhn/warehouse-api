@@ -36,64 +36,64 @@ class TestSearch:
         assert resp == {"language": ["FR"], "multiple": {"language": ["EN", "NL"]}}
 
     def test_count_summary(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {"_summary": ["count"]}
         )
         assert parsed_params == {}
-        assert total == 100
+        assert result_size == 100
         assert elements is None
-        assert count is True
+        assert is_summary_count is True
 
     def test_text_summary(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {"_summary": ["text"]}
         )
         assert parsed_params == {}
-        assert total == 100
+        assert result_size == 100
         assert elements == ["text", "id", "meta"]
-        assert count is False
+        assert is_summary_count is False
 
     def test_element(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {"_element": ["birthDate"]}
         )
         assert parsed_params == {}
-        assert total == 100
+        assert result_size == 100
         assert elements == ["birthDate"]
-        assert count is False
+        assert is_summary_count is False
 
     def test_elements(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {"_element": ["birthDate", "gender"]}
         )
         assert parsed_params == {}
-        assert total == 100
+        assert result_size == 100
         assert elements == ["birthDate", "gender"]
-        assert count is False
+        assert is_summary_count is False
         assert offset == 0
 
     def test_display_size(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {"_count": ["2"]}
         )
         assert parsed_params == {}
-        assert total == 2
+        assert result_size == 2
         assert elements is None
-        assert count is False
+        assert is_summary_count is False
         assert offset == 0
 
     def test_result_parameters(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {"_count": ["2"], "_summary": ["False"], "_element": ["birthDate,name"]}
         )
         assert parsed_params == {}
-        assert total == 2
+        assert result_size == 2
         assert elements == ["birthDate", "name"]
-        assert count is False
+        assert is_summary_count is False
         assert offset == 0
 
     def test_mix_parameters(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {
                 "language": ["FR", "EN,NL"],
                 "_element": ["birthDate", "name"],
@@ -105,20 +105,20 @@ class TestSearch:
             "language": ["FR"],
             "multiple": {"language": ["EN", "NL"]},
         }
-        assert total == 200
+        assert result_size == 200
         assert elements == ["text", "id", "meta"]
-        assert count is False
+        assert is_summary_count is False
         assert offset == 0
 
     def test_mix_params_count(self):
-        parsed_params, total, elements, count, offset = process_params(
+        parsed_params, result_size, elements, is_summary_count, offset = process_params(
             {"language": ["FR", "EN,NL"], "_summary": ["count"]}
         )
         assert parsed_params == {
             "language": ["FR"],
             "multiple": {"language": ["EN", "NL"]},
         }
-        assert total == 100
+        assert result_size == 100
         assert elements is None
-        assert count is True
+        assert is_summary_count is True
         assert offset == 0
