@@ -9,6 +9,7 @@ from subsearch.search import (
     resource_count,
     resource_search,
 )
+from flask_cors import CORS
 
 api = Blueprint("api", __name__)
 
