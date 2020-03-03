@@ -122,3 +122,4 @@ class TestSearch:
         assert elements is None
         assert is_summary_count is True
         assert offset == 0
+        
