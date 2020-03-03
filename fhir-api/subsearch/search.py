@@ -32,7 +32,7 @@ def parse_params(search_args):
 
 
 def clean_params(parsed_params):
-    if parsed_params.get("multiple"):
+    if "multiple" in parsed_params:
         parsed_params["multiple"].pop("_element", None)
     if parsed_params.get("multiple") == {}:
         parsed_params = {}
@@ -53,15 +53,15 @@ def process_params(search_args):
     result_size = int(result_size[0]) if result_size else 100
     is_summary_count = (
         True
-        if parsed_params.get("_summary") and parsed_params["_summary"][0] == "count"
+        if "_summary" in parsed_params and parsed_params["_summary"][0] == "count"
         else False
     )
 
-    if parsed_params.get("_summary") and parsed_params["_summary"][0] == "text":
+    if "_summary" in parsed_params and parsed_params["_summary"][0] == "text":
         elements = ["text", "id", "meta"]
-    elif parsed_params.get("_element"):
-        elements = parsed_params.get("_element")
-    elif parsed_params.get("multiple"):
+    elif "_element" in parsed_params:
+        elements = parsed_params["_element"]
+    elif "multiple" in parsed_params:
         elements = parsed_params["multiple"].get("_element", None)
 
     cleaned_params = clean_params(parsed_params)
@@ -69,7 +69,7 @@ def process_params(search_args):
     return cleaned_params, result_size, elements, is_summary_count, offset
 
 
-def count_model(Model, processed_params):
+def resource_count(Model, processed_params):
     try:
         return Model(id).count(processed_params)
     except elasticsearch.exceptions.NotFoundError as e:
@@ -82,7 +82,7 @@ def count_model(Model, processed_params):
         raise OperationOutcome(e)
 
 
-def search_model(Model, processed_params, offset, result_size, elements):
+def resource_search(Model, processed_params, offset, result_size, elements):
     try:
         return Model(id).search(processed_params, offset, result_size, elements)
     except elasticsearch.exceptions.NotFoundError as e:
