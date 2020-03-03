@@ -1,8 +1,9 @@
 from collections import defaultdict
+from errors.operation_outcome import OperationOutcome
+import elasticsearch
 
 
 def parse_comma(key, value):
-
     has_comma = "," in value
     if has_comma:
         return "multiple", {key: value.split(",")}
@@ -10,7 +11,7 @@ def parse_comma(key, value):
         return key, [value]
 
 
-def sub_search(search_args):
+def parse_params(search_args):
     parsed_params = defaultdict(list)
 
     if search_args == {}:
@@ -28,3 +29,67 @@ def sub_search(search_args):
                 else:
                     parsed_params[element_key].append(parsed_element[0])
     return parsed_params
+
+
+def clean_params(parsed_params):
+    if "multiple" in parsed_params:
+        parsed_params["multiple"].pop("_element", None)
+    if parsed_params.get("multiple") == {}:
+        parsed_params = {}
+
+    parsed_params.pop("_summary", None)
+    parsed_params.pop("_element", None)
+    return parsed_params
+
+
+def process_params(search_args):
+
+    parsed_params = parse_params(search_args)
+    # TODO: handle offset
+    offset = 0
+    elements = None
+
+    result_size = parsed_params.pop("_count", None)
+    result_size = int(result_size[0]) if result_size else 100
+    is_summary_count = (
+        True
+        if "_summary" in parsed_params and parsed_params["_summary"][0] == "count"
+        else False
+    )
+
+    if "_summary" in parsed_params and parsed_params["_summary"][0] == "text":
+        elements = ["text", "id", "meta"]
+    elif "_element" in parsed_params:
+        elements = parsed_params["_element"]
+    elif "multiple" in parsed_params:
+        elements = parsed_params["multiple"].get("_element", None)
+
+    cleaned_params = clean_params(parsed_params)
+
+    return cleaned_params, result_size, elements, is_summary_count, offset
+
+
+def resource_count(Model, processed_params):
+    try:
+        return Model(id).count(processed_params)
+    except elasticsearch.exceptions.NotFoundError as e:
+        raise OperationOutcome(
+            f"{e.info['error']['index']} is not indexed in the database yet."
+        )
+    except elasticsearch.exceptions.RequestError as e:
+        raise OperationOutcome(e)
+    except elasticsearch.exceptions.AuthenticationException as e:
+        raise OperationOutcome(e)
+
+
+def resource_search(Model, processed_params, offset, result_size, elements):
+    try:
+        return Model(id).search(processed_params, offset, result_size, elements)
+    except elasticsearch.exceptions.NotFoundError as e:
+        raise OperationOutcome(
+            f"{e.info['error']['index']} is not indexed in the database yet."
+        )
+    except elasticsearch.exceptions.RequestError as e:
+        raise OperationOutcome(e)
+    except elasticsearch.exceptions.AuthenticationException as e:
+        raise OperationOutcome(e)

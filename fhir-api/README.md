@@ -52,7 +52,7 @@ Implementation of a FHIR REST server API.
 
 ### Search a resource
 
-_Search is a work in progress, only works with strings right now_
+_Search is a work in progress_
 
 `GET http://localhost:5000/<resource_type>?[parameter1=value1][&parameter2=value2]...`
 
@@ -64,9 +64,20 @@ _Search is a work in progress, only works with strings right now_
 
 `valueN`: exact match of the extracted fhir attribute
 
-_Example (gets all patients)_: `GET http://localhost:5000/Patient`
 
-_Example (gets a patient by family name)_: `GET http://localhost:5000/Patient?name.0.family=Bins636`
+*Additional features are supported to improve the search:*
+`_count=N` search only the first N results,
+`_element=name,birthDate` return only some attributes of the resource queried,
+`_summary=text` return only elements *id, meta, text* of the bundle,
+`_summary=count` return only the number of resources that matched the query,   
+`_summary=false` return all parts of the resource.
+
+
+_Example (gets all patients)_: `GET http://localhost:5000/api/Patient`
+_Example (gets a patient by family name)_: `GET http://localhost:5000/api/Patient?name.family=Donald`
+_Example (gets name and birthdate of 2 patients named 'Donald' or 'Chalmers')_:`GET http://localhost/api/Patient?name.family=Donald,Chalmers&_count=2&_element=name,birthDate`
+
+
 
 ## Development
 

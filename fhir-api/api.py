@@ -4,8 +4,12 @@ from jsonschema import ValidationError
 from fhirstore import NotFoundError
 from errors.operation_outcome import OperationOutcome
 from models import resources_models
-from subsearch.search import sub_search
-import elasticsearch
+from subsearch.search import (
+    process_params,
+    resource_count,
+    resource_search,
+)
+
 from flask_cors import CORS
 
 api = Blueprint("api", __name__)
@@ -94,27 +98,16 @@ def search(resource_type):
 
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
 
-    parsed_params = sub_search(search_args)
-    offset = 0
-    total = 100
-
-    if parsed_params.get("_count"):
-        # Here _count is removed from the arguments to parse
-        # because it needs to exist outside the search query in elasticsearch
-        total = int(parsed_params.pop("_count")[0])
+    processed_params, result_size, elements, is_summary_count, offset = process_params(search_args)
     Model = resources_models[resource_type]
-    try:
-        results = Model(id).search(parsed_params, offset, total)
-    except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(e)
-    except elasticsearch.exceptions.RequestError as e:
-        raise OperationOutcome(e)
-    except elasticsearch.exceptions.AuthenticationException as e:
-        raise OperationOutcome(e)
+
+    if is_summary_count:
+        results = resource_count(Model, processed_params)
+    else:
+        results = resource_search(Model, processed_params, offset, result_size, elements)
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
-
     return jsonify(results)
 
 
