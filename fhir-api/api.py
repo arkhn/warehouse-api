@@ -13,6 +13,7 @@ from subsearch.search import (
 from flask_cors import CORS
 from pandas import merge, json_normalize, DataFrame
 from urllib.parse import parse_qs
+
 api = Blueprint("api", __name__)
 # enable Cross-Origin Resource Sharing
 # "Allow-Control-Allow-Origin" HTTP header
@@ -112,24 +113,19 @@ def search(resource_type):
     return jsonify(results)
 
 
-
 def search_from_url_to_json(resource_type, url_args):
     if resource_type not in resources_models:
         raise OperationOutcome("Unknown resource type")
 
     search_args = parse_qs(url_args)
 
-    processed_params, result_size, elements, is_summary_count, offset = process_params(
-        search_args
-    )
+    processed_params, result_size, elements, is_summary_count, offset = process_params(search_args)
     Model = resources_models[resource_type]
 
     if is_summary_count:
         results = resource_count(Model, processed_params)
     else:
-        results = resource_search(
-            Model, processed_params, offset, result_size, elements
-        )
+        results = resource_search(Model, processed_params, offset, result_size, elements)
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
@@ -144,10 +140,10 @@ def stringToInt(x):
 
 
 @api.route("/t2a", methods=["GET"])
-def t2a(start_chemo, end_chemo, limit=10):
+def t2a():
     args = {key: request.args.getlist(key) for key in request.args.keys()}
-    start_chemo = args["start"]
-    end_chemo = args["end"]
+    # start_chemo = args["start"]
+    # end_chemo = args["end"]
     limit = args["limit"]
     products = search_from_url_to_json(
         "MedicinalProductPharmaceutical",
@@ -178,15 +174,9 @@ def t2a(start_chemo, end_chemo, limit=10):
         {
             "dosage.dose.value": x["dosage"]["dose"]["value"],
             "date_dispensation": x["effectiveDateTime"],
-            "medication.dci": stringToInt(
-                x["medicationReference"]["identifier"]["value"]
-            ),
-            "medicationrequest.identifier": stringToInt(
-                x["request"]["identifier"]["value"]
-            ),
-            "patient.identifier.value": stringToInt(
-                x["subject"]["identifier"]["value"]
-            ),
+            "medication.dci": stringToInt(x["medicationReference"]["identifier"]["value"]),
+            "medicationrequest.identifier": stringToInt(x["request"]["identifier"]["value"]),
+            "patient.identifier.value": stringToInt(x["subject"]["identifier"]["value"]),
         }
         for x in medicationadministration["items"]
         if stringToInt(x["subject"]["identifier"]["value"]) >= 0
@@ -199,15 +189,11 @@ def t2a(start_chemo, end_chemo, limit=10):
             "basedon.identifier": stringToInt(x["basedOn"][0]["identifier"]["value"]),
             "identifier.value": stringToInt(x["identifier"][0]["value"]),
             "status": x["status"],
-            "medication.dci": stringToInt(
-                x["medicationReference"]["identifier"]["value"]
-            ),
+            "medication.dci": stringToInt(x["medicationReference"]["identifier"]["value"]),
             "priorRequest.identifier.value": stringToInt(
                 x["priorPrescription"]["identifier"]["value"]
             ),
-            "patient.identifier.value": stringToInt(
-                x["subject"]["identifier"]["value"]
-            ),
+            "patient.identifier.value": stringToInt(x["subject"]["identifier"]["value"]),
             "groupeService.identifier.value": stringToInt(
                 x["supportingInformation"][0]["identifier"]["value"]
             ),
@@ -250,9 +236,9 @@ def t2a(start_chemo, end_chemo, limit=10):
     patient_parsed = [
         {
             "identifier": stringToInt(x["identifier"][0]["value"]),
-            "managingOrganization": x.get(
-                "managingOrganization", {"identifier": {"value": "-2"}}
-            )["identifier"][
+            "managingOrganization": x.get("managingOrganization", {"identifier": {"value": "-2"}})[
+                "identifier"
+            ][
                 "value"
             ],  # json is broken. If managingOrganization does not exist --> return -1
         }
@@ -262,13 +248,9 @@ def t2a(start_chemo, end_chemo, limit=10):
 
     products_parsed = [
         {
-            "administrableDoseForm.DOSAGE": x["administrableDoseForm"]["coding"][0][
-                "code"
-            ],
+            "administrableDoseForm.DOSAGE": x["administrableDoseForm"]["coding"][0]["code"],
             "characteristics.T2A": x["characteristics"][0]["code"]["coding"][0]["code"],
-            "characteristics.ATU_T2A": x["characteristics"][0]["status"]["coding"][0][
-                "code"
-            ],
+            "characteristics.ATU_T2A": x["characteristics"][0]["status"]["coding"][0]["code"],
             "identifier.numero_lot": stringToInt(x["identifier"][0]["value"]),
             "identifier.UCDcode": stringToInt(x["identifier"][1]["value"]),
             "identifier.nompdt": stringToInt(x["identifier"][2]["value"]),
@@ -285,15 +267,13 @@ def t2a(start_chemo, end_chemo, limit=10):
     ]
 
     episodeofcare_dataframe = DataFrame.from_dict(episodeofcare_parsed)
-    medicationadministration_dataframe = DataFrame.from_dict(
-        medicationadministration_parsed
-    )
+    medicationadministration_dataframe = DataFrame.from_dict(medicationadministration_parsed)
     medicationrequest_dataframe = DataFrame.from_dict(medicationrequest_parsed)
     organization_dataframe = DataFrame.from_dict(organization_parsed)
     patient_dataframe = DataFrame.from_dict(patient_parsed)
     products_dataframe = DataFrame.from_dict(products_parsed)
 
-    ##group Patient, Episode of care and organization together
+    # group Patient, Episode of care and organization together
     # key1 and 2 not named the same
     group1 = merge(
         medicationrequest_dataframe,
@@ -324,7 +304,7 @@ def t2a(start_chemo, end_chemo, limit=10):
         how="left",
     )
     final = merge(
-        group4, 
+        group4,
         group2,
         left_on=["medicationrequest.identifier"],
         right_on=["basedon.identifier"],
@@ -332,6 +312,7 @@ def t2a(start_chemo, end_chemo, limit=10):
     )
 
     return final[:limit].to_dict(orient="records")
+
 
 @api.errorhandler(OperationOutcome)
 def handle_bad_request(e):
