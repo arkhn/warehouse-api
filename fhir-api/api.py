@@ -129,7 +129,7 @@ def search_from_url_to_json(resource_type, url_args):
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
-    return json_normalize(jsonify(results), max_level=3)
+    return jsonify(results)
 
 
 def stringToInt(x):
@@ -160,7 +160,7 @@ def t2a():
         "Patient", "_count=3000&_element=identifier.value&subject.identifier.value"
     )
     organization = search_from_url_to_json("Organization", "_element=identifier,partOf")
-
+    
     episodeofcare_parsed = [
         {
             "patient.identifier": stringToInt(x["patient"]["identifier"]["value"]),
