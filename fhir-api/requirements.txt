@@ -7,3 +7,4 @@ fhirstore==0.3.5
 urllib3==1.25.7
 elasticsearch==7.0.5
 Flask-Cors==3.0.8
+pandas==1.0.1
