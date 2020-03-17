@@ -44,11 +44,6 @@ def get_es_connection():
     return connection_es
 
 
-# get_store initializes a new FHIRStore instance
-# it caches the resources loaded from the database in order
-# to run this operation only once (at application startup)
-
-
 def get_store():
     """
     get_store initializes a new FHIRStore instance

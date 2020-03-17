@@ -1,7 +1,10 @@
+import logging
 from flask import Blueprint, request, jsonify
 from jsonschema import ValidationError
 
 from fhirstore import NotFoundError
+
+from db import get_store
 from errors.operation_outcome import OperationOutcome
 from models import resources_models
 from subsearch.search import (
@@ -21,7 +24,7 @@ CORS(api)
 @api.route("/<resource_type>/<id>", methods=["GET"])
 def read(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome("Unknown resource type")
+        raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
     Model = resources_models[resource_type]
     try:
@@ -35,7 +38,7 @@ def read(resource_type, id):
 @api.route("/<resource_type>/<id>", methods=["PUT"])
 def update(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome("Unknown resource type")
+        raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
@@ -51,7 +54,7 @@ def update(resource_type, id):
 @api.route("/<resource_type>/<id>", methods=["PATCH"])
 def patch(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome("Unknown resource type")
+        raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
     Model = resources_models[resource_type]
     patch_data = request.get_json(force=True)
@@ -67,7 +70,7 @@ def patch(resource_type, id):
 @api.route("/<resource_type>", methods=["POST"])
 def create(resource_type):
     if resource_type not in resources_models:
-        raise OperationOutcome("Unknown resource type")
+        raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
@@ -83,7 +86,7 @@ def create(resource_type):
 @api.route("/<resource_type>/<id>", methods=["DELETE"])
 def delete(resource_type, id):
     if resource_type not in resources_models:
-        raise OperationOutcome("Unknown resource type")
+        raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
     Model = resources_models[resource_type]
     m = Model(id=id).delete()
@@ -94,7 +97,7 @@ def delete(resource_type, id):
 @api.route("/<resource_type>", methods=["GET"])
 def search(resource_type):
     if resource_type not in resources_models:
-        raise OperationOutcome("Unknown resource type")
+        raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
 
@@ -109,6 +112,24 @@ def search(resource_type):
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
     return jsonify(results)
+
+
+@api.route("/upload-bundle", methods=["POST"])
+def upload_bundle():
+    # TODO methodology to avoid/process huge bundles
+    bundle_data = request.get_json(force=True)
+
+    if "resourceType" not in bundle_data or bundle_data["resourceType"] != "Bundle":
+        raise OperationOutcome("input must be a FHIR Bundle resource")
+
+    store = get_store()
+    try:
+        store.upload_bundle(bundle_data)
+    except Exception as e:
+        logging.error(f"Error while uploading bundle: {e}")
+        return jsonify(success=False)
+
+    return jsonify(success=True)
 
 
 @api.errorhandler(OperationOutcome)

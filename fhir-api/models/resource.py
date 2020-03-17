@@ -1,7 +1,8 @@
 import uuid
 from flask import jsonify
 
-from fhirstore import NotFoundError
+from pymongo.errors import DuplicateKeyError
+
 from errors.operation_outcome import OperationOutcome
 from db import get_store
 
@@ -34,14 +35,12 @@ class Resource:
         self.id = self.id or str(uuid.uuid4())
 
         try:
-            if self.db.read(self.resource_type, self.id):
-                raise OperationOutcome(f"Resource {self.id} already exist")
-        except NotFoundError:
-            pass
+            self.resource = self.db.create(
+                {**self.resource, "resourceType": self.resource_type, "id": self.id}
+            )
+        except DuplicateKeyError:
+            raise OperationOutcome(f"Resource {self.id} already exists")
 
-        self.resource = self.db.create(
-            {**self.resource, "resourceType": self.resource_type, "id": self.id}
-        )
         return self
 
     def read(self):

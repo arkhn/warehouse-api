@@ -75,18 +75,6 @@ be provided",
         assert r.id == "test"
         assert r.resource == create_ret_data
 
-    def test_create_already_exist(self, mock_get_store):
-        """Accepts the resource data when an id was provided"""
-        resource_data = {"my": "resource", "id": "test"}
-        create_ret_data = {**resource_data, "_id": "0541"}
-        mock_get_store.return_value.create.return_value = create_ret_data
-        mock_get_store.return_value.read.return_value = {"id": "test"}
-        r = Resource(resource=resource_data)
-
-        with pytest.raises(OperationOutcome, match="Resource test already exist"):
-            r = r.create()
-        assert mock_get_store.return_value.create.call_count == 0
-
     def test_read(self, mock_get_store):
         """Calls the read method of the fhirstore client and registers the resource
         """
