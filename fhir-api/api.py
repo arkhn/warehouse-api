@@ -95,10 +95,14 @@ def delete(resource_type, id):
 
 @api.route("/<resource_type>", methods=["GET"])
 def search(resource_type):
-    if resource_type not in resources_models:
-        raise OperationOutcome("Unknown resource type")
 
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
+    
+    if not resource_type and search_args.get("_type", None):
+        resource_type = search_args["_type"]
+        
+    if resource_type not in resources_models:
+        raise OperationOutcome("Unknown resource type")
 
     processed_params, result_size, elements, is_summary_count, offset = process_params(search_args)
     Model = resources_models[resource_type]
@@ -129,7 +133,7 @@ def search_from_url_to_json(resource_type, url_args):
 
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criterias")
-    return jsonify(results)
+    return results
 
 
 def stringToInt(x):
@@ -144,23 +148,23 @@ def t2a():
     args = {key: request.args.getlist(key) for key in request.args.keys()}
     # start_chemo = args["start"]
     # end_chemo = args["end"]
-    limit = args["limit"]
+#    limit = args["limit"][0]
+    limit= 15
     products = search_from_url_to_json(
         "MedicinalProductPharmaceutical",
-        "administrableDoseForm=gt0&_element=characteristics,ingredient,status,identifier,administrableDoseForm",
+        "_count=3000",
     )
     medicationrequest = search_from_url_to_json(
-        "MedicationRequest", f"identifier.value=gt200000&_count=3000",
+        "MedicationRequest", "_count=3000",
     )
     medicationadministration = search_from_url_to_json(
-        "MedicationAdministration", f"_count=3000&request.identifier.value=gt200000",
+        "MedicationAdministration", "_count=3000&request.identifier.value=gt200000",
     )
     episodeofcare = search_from_url_to_json("EpisodeOfCare", "_count=3000")
     patient = search_from_url_to_json(
         "Patient", "_count=3000&_element=identifier.value&subject.identifier.value"
     )
-    organization = search_from_url_to_json("Organization", "_element=identifier,partOf")
-    
+    organization = search_from_url_to_json("Organization", "partOf.identifier.value=gt0&_element=identifier,partOf")
     episodeofcare_parsed = [
         {
             "patient.identifier": stringToInt(x["patient"]["identifier"]["value"]),
@@ -310,8 +314,7 @@ def t2a():
         right_on=["basedon.identifier"],
         how="left",
     )
-
-    return final[:limit].to_dict(orient="records")
+    return jsonify(final[:limit].to_dict(orient="records"))
 
 
 @api.errorhandler(OperationOutcome)
