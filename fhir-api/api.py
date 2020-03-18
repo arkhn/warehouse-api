@@ -95,14 +95,9 @@ def delete(resource_type, id):
 
 @api.route("/<resource_type>", methods=["GET"])
 def search(resource_type):
-
-    search_args = {key: request.args.getlist(key) for key in request.args.keys()}
-    
-    if not resource_type and search_args.get("_type", None):
-        resource_type = search_args["_type"]
-        
     if resource_type not in resources_models:
         raise OperationOutcome("Unknown resource type")
+    search_args = {key: request.args.getlist(key) for key in request.args.keys()}
 
     processed_params, result_size, elements, is_summary_count, offset = process_params(search_args)
     Model = resources_models[resource_type]
