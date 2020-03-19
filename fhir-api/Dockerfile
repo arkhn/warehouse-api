@@ -11,6 +11,7 @@ RUN apk add --no-cache \
 RUN addgroup -S api_group && adduser -S api_user -G api_group
 
 WORKDIR /srv/flask_app
+ENV PYTHONPATH "${PYTHONPATH}:/srv/flask_app"
 
 COPY requirements.txt  /srv/flask_app/requirements.txt
 RUN pip3 install -r requirements.txt --src /usr/local/src
