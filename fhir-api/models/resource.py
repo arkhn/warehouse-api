@@ -85,11 +85,11 @@ class Resource:
         self.id = None
         return self
 
-    def search(self, params, offset=0, result_size=100, elements=None):
+    def search(self, params, result_size=100, elements=None, offset=0, sort=None, include=None):
         """Searchs a resource by calling fhirstore search function
         """
         results = self.db.search(
-            self.resource_type, params, offset, result_size, elements
+            self.resource_type, params, result_size, elements, offset, sort, include
         )
         return results
 

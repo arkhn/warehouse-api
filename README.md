@@ -81,4 +81,4 @@ _Search is a work in progress, only works with strings right now_
 
 _Example (gets all patients)_: `GET http://localhost/Patient`
 
-_Example (gets a patient by family name)_: `GET http://localhost/Patient?name.0.family=Bins636`
+_Example (gets a patient by family name)_: `GET http://localhost/Patient?name.family=Bins636`

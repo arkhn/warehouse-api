@@ -1,6 +1,7 @@
 from collections import defaultdict
 from errors.operation_outcome import OperationOutcome
 import elasticsearch
+import re
 
 
 def parse_comma(key, value):
@@ -31,14 +32,59 @@ def parse_params(search_args):
     return parsed_params
 
 
+def sort_params(parsed_params):
+    sort = None
+    if "_sort" in parsed_params:
+        sort = parsed_params["_sort"]
+    elif "multiple" in parsed_params:
+        sort = parsed_params["multiple"].get("_sort", None)
+    # if there is a sorting argument, process it to handle a change of sorting order
+    if sort:
+        sorting_params = []
+        for argument in sort:
+            # find a "-" before the argument. It indicates a sorting order different from default
+            has_minus = re.search(r"^-(.*)", argument)
+            if has_minus:
+                # if the argument is -score, sort by ascending order (i.e. ascending relevance)
+                if has_minus.group(1) == "_score":
+                    sorting_params.append({has_minus.group(1): {"order": "asc"}})
+                # for any other argument, sort by descending order
+                else:
+                    sorting_params.append({has_minus.group(1): {"order": "desc"}})
+            # if there is no "-", use order defaults defined in elasticsearch
+            else:
+                sorting_params.append(argument)
+        return sorting_params
+    else:
+        return None
+
+
+def include_params(parsed_params):
+
+    included = None
+    if "_include" in parsed_params:
+        included = re.search(r"(.*):(.*)", parsed_params["_include"][0]).group(2)
+
+    elif "multiple" in parsed_params and parsed_params["multiple"].get("_include", None):
+        attributes = parsed_params["multiple"].get("_include", None)
+        included = [re.search(r"(.*):(.*)", elem).group(2) for elem in attributes]
+    return included
+
+
 def clean_params(parsed_params):
     if "multiple" in parsed_params:
         parsed_params["multiple"].pop("_element", None)
+        parsed_params["multiple"].pop("_sort", None)
+        parsed_params["multiple"].pop("_include", None)
+
     if parsed_params.get("multiple") == {}:
         parsed_params = {}
 
     parsed_params.pop("_summary", None)
     parsed_params.pop("_element", None)
+    parsed_params.pop("_sort", None)
+    parsed_params.pop("_include", None)
+
     return parsed_params
 
 
@@ -48,14 +94,11 @@ def process_params(search_args):
     # TODO: handle offset
     offset = 0
     elements = None
-
+    sort = sort_params(parsed_params)
+    include = include_params(parsed_params)
     result_size = parsed_params.pop("_count", None)
     result_size = int(result_size[0]) if result_size else 100
-    is_summary_count = (
-        True
-        if "_summary" in parsed_params and parsed_params["_summary"][0] == "count"
-        else False
-    )
+    is_summary_count = "_summary" in parsed_params and parsed_params["_summary"][0] == "count"
 
     if "_summary" in parsed_params and parsed_params["_summary"][0] == "text":
         elements = ["text", "id", "meta"]
@@ -66,29 +109,25 @@ def process_params(search_args):
 
     cleaned_params = clean_params(parsed_params)
 
-    return cleaned_params, result_size, elements, is_summary_count, offset
+    return cleaned_params, result_size, elements, is_summary_count, offset, sort, include
 
 
 def resource_count(Model, processed_params):
     try:
         return Model(id).count(processed_params)
     except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(
-            f"{e.info['error']['index']} is not indexed in the database yet."
-        )
+        raise OperationOutcome(f"{e.info['error']['index']} is not indexed in the database yet.")
     except elasticsearch.exceptions.RequestError as e:
         raise OperationOutcome(e)
     except elasticsearch.exceptions.AuthenticationException as e:
         raise OperationOutcome(e)
 
 
-def resource_search(Model, processed_params, offset, result_size, elements):
+def resource_search(Model, processed_params, result_size, elements, offset, sort, include):
     try:
-        return Model(id).search(processed_params, offset, result_size, elements)
+        return Model(id).search(processed_params, result_size, elements, offset, sort, include)
     except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(
-            f"{e.info['error']['index']} is not indexed in the database yet."
-        )
+        raise OperationOutcome(f"{e.info['error']['index']} is not indexed in the database yet.")
     except elasticsearch.exceptions.RequestError as e:
         raise OperationOutcome(e)
     except elasticsearch.exceptions.AuthenticationException as e:

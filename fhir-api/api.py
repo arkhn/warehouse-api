@@ -101,16 +101,66 @@ def search(resource_type):
 
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
 
-    processed_params, result_size, elements, is_summary_count, offset = process_params(search_args)
+    (
+        processed_params,
+        result_size,
+        elements,
+        is_summary_count,
+        offset,
+        sort,
+        include,
+    ) = process_params(search_args)
     Model = resources_models[resource_type]
 
     if is_summary_count:
         results = resource_count(Model, processed_params)
     else:
-        results = resource_search(Model, processed_params, offset, result_size, elements)
+        results = resource_search(
+            Model, processed_params, offset, result_size, elements, sort, include
+        )
 
     if not results:
-        raise OperationOutcome(f"No {resource_type} matching search criterias")
+        raise OperationOutcome(f"No {resource_type} matching search criteria")
+    return jsonify(results)
+
+
+@api.route("/", methods=["GET"])
+def search_multiple_resources():
+    search_args = {key: request.args.getlist(key) for key in request.args.keys()}
+    if not search_args.get("_type"):
+        raise OperationOutcome("No resource provided in _type parameter")
+    if "," not in search_args["_type"]:
+        raise OperationOutcome("Provide more than one resource in _type parameter")
+
+    resource_types = search_args.pop("_type")[0].split(",")
+    (
+        processed_params,
+        result_size,
+        elements,
+        is_summary_count,
+        offset,
+        sort,
+        include,
+    ) = process_params(search_args)
+    results = {"resource_type": "Bundle", "total": 0, "items": []}
+
+    for resource in resource_types:
+        Model = resources_models[resource]
+        if is_summary_count:
+            result_per_resource = resource_count(Model, processed_params)
+        else:
+            result_per_resource = resource_search(
+                Model, processed_params, result_size, elements, offset, sort, include
+            )
+            results["items"] += result_per_resource.get("items")
+
+        results["total"] += result_per_resource["total"]
+
+        if "tag" not in results:
+            results["tag"] = result_per_resource.get("tag")
+
+    if not results:
+        raise OperationOutcome(f"No {resource_types} matching search criteria")
     return jsonify(results)
 
 

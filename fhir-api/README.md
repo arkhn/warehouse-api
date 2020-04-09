@@ -52,7 +52,7 @@ Implementation of a FHIR REST server API.
 
 ### Search a resource
 
-_Search is a work in progress_
+_Search is a work in progress, compliant to https://www.hl7.org/fhir/search.html_
 
 `GET http://localhost:5000/<resource_type>?[parameter1=value1][&parameter2=value2]...`
 
@@ -64,16 +64,27 @@ _Search is a work in progress_
 
 `valueN`: exact match of the extracted fhir attribute
 
+Some of the features documented here  are supported by the api. \
+Modifiers :
+- String modifiers (`:exact`, `:contains`)
+- Prefixes for dates, numbers, and quantity (eq, ne, gt, lt, ge, le)
+- `:identifier`, `:in`, `:not`
+- tokens `[parameter]=[system]|[code]`<br>
 
-*Additional features are supported to improve the search:*
-`_count=N` search only the first N results,
-`_element=name,birthDate` return only some attributes of the resource queried,
-`_summary=text` return only elements *id, meta, text* of the bundle,
-`_summary=count` return only the number of resources that matched the query,   
-`_summary=false` return all parts of the resource.
+Additional features are supported to improve the search:*
+- `_count=N` display only the first N results,
+- `_element=name,birthDate` return only some attributes of the resource queried,
+- `_summary=text` return only elements *id, meta, text* of the bundle,
+- `_summary=count` return only the number of resources that matched the query,   
+- `_summary=false` return all parts of the resource.
+- `_sort` by a parameter in ascending or descending order, can be sorted by _score. 
+- `_include` include to the result another resource referenced in the search results
+- `?/_type` query more than one resource type
 
 
-_Example (gets all patients)_: `GET http://localhost:5000/api/Patient`
+
+
+_Example (gets all patients)_: `GET http://localhost:5000/api/Patient` <br>
 _Example (gets a patient by family name)_: `GET http://localhost:5000/api/Patient?name.family=Donald`
 _Example (gets name and birthdate of 2 patients named 'Donald' or 'Chalmers')_:`GET http://localhost/api/Patient?name.family=Donald,Chalmers&_count=2&_element=name,birthDate`
 
