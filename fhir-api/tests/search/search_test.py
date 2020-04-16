@@ -229,7 +229,7 @@ class TestSearch:
         assert is_summary_count is False
         assert offset == 0
         assert sort is None
-        assert include == "patient"
+        assert include == ["patient"]
 
     def test_sort_param(self):
         sort = sort_params({"_sort": ["birthDate"]})
@@ -265,7 +265,7 @@ class TestSearch:
 
     def test_include_param(self):
         included = include_params({"_include": ["medicationrequest:patient"]})
-        assert included == "patient"
+        assert included == ["patient"]
 
     def test_include_params(self):
         included = include_params(

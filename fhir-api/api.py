@@ -12,7 +12,6 @@ from subsearch.search import (
     resource_count,
     resource_search,
 )
-
 from flask_cors import CORS
 
 api = Blueprint("api", __name__)
@@ -98,9 +97,7 @@ def delete(resource_type, id):
 def search(resource_type):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
-
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
-
     (
         processed_params,
         result_size,
@@ -116,9 +113,8 @@ def search(resource_type):
         results = resource_count(Model, processed_params)
     else:
         results = resource_search(
-            Model, processed_params, offset, result_size, elements, sort, include
+            Model, processed_params, result_size, elements, offset, sort, include
         )
-
     if not results:
         raise OperationOutcome(f"No {resource_type} matching search criteria")
     return jsonify(results)
@@ -129,7 +125,7 @@ def search_multiple_resources():
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
     if not search_args.get("_type"):
         raise OperationOutcome("No resource provided in _type parameter")
-    if "," not in search_args["_type"]:
+    if "," not in search_args["_type"][0]:
         raise OperationOutcome("Provide more than one resource in _type parameter")
 
     resource_types = search_args.pop("_type")[0].split(",")
@@ -143,7 +139,6 @@ def search_multiple_resources():
         include,
     ) = process_params(search_args)
     results = {"resource_type": "Bundle", "total": 0, "items": []}
-
     for resource in resource_types:
         Model = resources_models[resource]
         if is_summary_count:
@@ -152,10 +147,11 @@ def search_multiple_resources():
             result_per_resource = resource_search(
                 Model, processed_params, result_size, elements, offset, sort, include
             )
-            results["items"] += result_per_resource.get("items")
+        if not result_per_resource:
+            continue
 
         results["total"] += result_per_resource["total"]
-
+        results["items"] += result_per_resource.get("items")
         if "tag" not in results:
             results["tag"] = result_per_resource.get("tag")
 

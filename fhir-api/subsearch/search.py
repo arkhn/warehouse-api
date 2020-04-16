@@ -2,6 +2,7 @@ from collections import defaultdict
 from errors.operation_outcome import OperationOutcome
 import elasticsearch
 import re
+import logging
 
 
 def parse_comma(key, value):
@@ -63,11 +64,18 @@ def include_params(parsed_params):
 
     included = None
     if "_include" in parsed_params:
-        included = re.search(r"(.*):(.*)", parsed_params["_include"][0]).group(2)
+        try:
+            included = [re.search(r"(.*):(.*)", parsed_params["_include"][0]).group(2)]
+        except AttributeError:
+            raise OperationOutcome(f"_include must be of format Resource:attribute")
 
     elif "multiple" in parsed_params and parsed_params["multiple"].get("_include", None):
         attributes = parsed_params["multiple"].get("_include", None)
-        included = [re.search(r"(.*):(.*)", elem).group(2) for elem in attributes]
+        try:
+            included = [re.search(r"(.*):(.*)", elem).group(2) for elem in attributes]
+        except AttributeError:
+            raise OperationOutcome(f"_include must be of format Resource:attribute")
+
     return included
 
 
@@ -116,7 +124,7 @@ def resource_count(Model, processed_params):
     try:
         return Model(id).count(processed_params)
     except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(f"{e.info['error']['index']} is not indexed in the database yet.")
+        logging.warning(f"{e.info['error']['index']} is not indexed in the database yet.")
     except elasticsearch.exceptions.RequestError as e:
         raise OperationOutcome(e)
     except elasticsearch.exceptions.AuthenticationException as e:
@@ -127,7 +135,7 @@ def resource_search(Model, processed_params, result_size, elements, offset, sort
     try:
         return Model(id).search(processed_params, result_size, elements, offset, sort, include)
     except elasticsearch.exceptions.NotFoundError as e:
-        raise OperationOutcome(f"{e.info['error']['index']} is not indexed in the database yet.")
+        logging.warning(f"{e.info['error']['index']} is not indexed in the database yet.")
     except elasticsearch.exceptions.RequestError as e:
         raise OperationOutcome(e)
     except elasticsearch.exceptions.AuthenticationException as e:
