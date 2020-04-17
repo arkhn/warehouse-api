@@ -138,7 +138,7 @@ def search_multiple_resources():
         sort,
         include,
     ) = process_params(search_args)
-    results = {"resource_type": "Bundle", "total": 0, "items": []}
+    results = {"resource_type": "Bundle", "total": 0, "entry": []}
     for resource in resource_types:
         Model = resources_models[resource]
         if is_summary_count:
@@ -151,7 +151,7 @@ def search_multiple_resources():
             continue
 
         results["total"] += result_per_resource["total"]
-        results["items"] += result_per_resource.get("items")
+        results["entry"] += result_per_resource.get("entry")
         if "tag" not in results:
             results["tag"] = result_per_resource.get("tag")
 
