@@ -160,6 +160,11 @@ def search_multiple_resources():
     return jsonify(results)
 
 
+@api.route("/list-collections", methods=["GET"])
+def list_collections():
+    return jsonify(resources_models)
+
+
 @api.route("/upload-bundle", methods=["POST"])
 def upload_bundle():
     # TODO methodology to avoid/process huge bundles
