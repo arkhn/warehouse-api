@@ -162,7 +162,7 @@ def search_multiple_resources():
 
 @api.route("/list-collections", methods=["GET"])
 def list_collections():
-    return jsonify(resources_models)
+    return jsonify(list(resources_models.keys()))
 
 
 @api.route("/upload-bundle", methods=["POST"])
