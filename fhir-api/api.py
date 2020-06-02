@@ -1,19 +1,17 @@
 import logging
+
+import elasticsearch
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 from jsonschema import ValidationError
 
 from fhirstore import NotFoundError
+from fhirstore.search import SearchArguments, Bundle
 
 from authentication import auth_required
 from db import get_store
 from errors import OperationOutcome, AuthenticationError
 from models import resources_models
-from subsearch.search import (
-    process_params,
-    resource_count,
-    resource_search,
-)
 
 api = Blueprint("api", __name__)
 # enable Cross-Origin Resource Sharing
@@ -102,70 +100,86 @@ def delete(resource_type, id):
 @api.route("/<resource_type>", methods=["GET"])
 @auth_required
 def search(resource_type):
-    if resource_type not in resources_models:
-        raise OperationOutcome(f"Unknown resource type: {resource_type}")
-    search_args = {key: request.args.getlist(key) for key in request.args.keys()}
-    (
-        processed_params,
-        result_size,
-        elements,
-        is_summary_count,
-        offset,
-        sort,
-        include,
-    ) = process_params(search_args)
-    Model = resources_models[resource_type]
+    bundle = Bundle()
 
-    if is_summary_count:
-        results = resource_count(Model, processed_params)
-    else:
-        results = resource_search(
-            Model, processed_params, result_size, elements, offset, sort, include
+    if resource_type not in resources_models:
+        bundle.fill_error(diagnostic=f"Unknown resource type: {resource_type}")
+        return jsonify(bundle.content)
+    search_args = SearchArguments()
+    search_args.parse(request.args, resource_type)
+
+    Model = resources_models[resource_type]
+    try:
+        bundle.complete(Model(id).search(request.args), search_args.formatting_args)
+
+    except elasticsearch.exceptions.NotFoundError as e:
+        bundle.fill_error(
+            diagnostic=f"{e.info['error']['index']} is not indexed in the database yet."
         )
-    if not results:
-        raise OperationOutcome(f"No {resource_type} matching search criteria")
-    return jsonify(results)
+    except elasticsearch.exceptions.RequestError as e:
+        bundle.fill_error(diagnostic=e.info["error"]["root_cause"])
+    except elasticsearch.exceptions.AuthenticationException as e:
+        bundle.fill_error(diagnostic=e.info["error"]["root_cause"])
+
+    if "entry" in bundle.content and bundle.content["total"] == 0:
+        error_bundle = Bundle()
+        error_bundle.fill_error(
+            severity="warning",
+            code="not-found",
+            details=f"No {resource_type} matching search criteria",
+        )
+        bundle.content["entry"].append({"resource": error_bundle.content})
+
+    return jsonify(bundle.content)
 
 
 @api.route("/", methods=["GET"])
 @auth_required
 def search_multiple_resources():
-    search_args = {key: request.args.getlist(key) for key in request.args.keys()}
-    if not search_args.get("_type"):
-        raise OperationOutcome("No resource provided in _type parameter")
-    if "," not in search_args["_type"][0]:
-        raise OperationOutcome("Provide more than one resource in _type parameter")
+    bundle = Bundle()
+    if not request.args.get("_type"):
+        bundle.fill_error(
+            code="structure",
+            diagnostic="No resource provided in _type parameter",
+            details="Search across all resource types is not handled yet",
+        )
+        return jsonify(bundle.content)
 
-    resource_types = search_args.pop("_type")[0].split(",")
-    (
-        processed_params,
-        result_size,
-        elements,
-        is_summary_count,
-        offset,
-        sort,
-        include,
-    ) = process_params(search_args)
-    results = {"resource_type": "Bundle", "total": 0, "entry": []}
-    for resource in resource_types:
-        Model = resources_models[resource]
-        if is_summary_count:
-            result_per_resource = resource_count(Model, processed_params)
+    resources = request.args["_type"].split(",")
+    if len(resources) < 1:
+        bundle.fill_error(
+            code="structure", diagnostic="Provide at least one resource in _type parameter",
+        )
+        return jsonify(bundle.content)
+
+    search_args = SearchArguments()
+    # initiate the search args with the first resource provided
+    search_args.parse(request.args, resources[0])
+
+    for resource_type in resources:
+        if resource_type not in resources_models:
+            bundle.fill_error(diagnostic=f"Unknown resource type: {resource_type}")
         else:
-            result_per_resource = resource_search(
-                Model, processed_params, result_size, elements, offset, sort, include
-            )
-        if not result_per_resource:
-            continue
+            Model = resources_models[resource_type]
+            try:
+                bundle.complete(Model(id).search(request.args), search_args.formatting_args)
+            except elasticsearch.exceptions.NotFoundError as e:
+                logging.warning(f"{e.info['error']['index']} is not indexed in the database yet.")
+            except elasticsearch.exceptions.RequestError as e:
+                bundle.fill_error(code="structure", diagnostic=e.info["error"]["root_cause"])
+            except elasticsearch.exceptions.AuthenticationException as e:
+                bundle.fill_error(code="login", diagnostic=e.info["error"]["root_cause"])
 
-        results["total"] += result_per_resource["total"]
-        results["entry"] += result_per_resource.get("entry")
-        if "tag" not in results:
-            results["tag"] = result_per_resource.get("tag")
+    if "entry" in bundle.content and bundle.content["total"] == 0:
+        error_bundle = Bundle()
+        error_bundle.fill_error(
+            severity="warning",
+            code="not-found",
+            details=f"No {resource_type} matching search criteria",
+        )
+        bundle.content["entry"].append({"resource": error_bundle.content})
 
-    if not results:
-        raise OperationOutcome(f"No {resource_types} matching search criteria")
-    return jsonify(results)
+    return jsonify(bundle.content)
 
 
 @api.route("/list-collections", methods=["GET"])

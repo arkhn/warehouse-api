@@ -85,18 +85,10 @@ class Resource:
         self.id = None
         return self
 
-    def search(self, params, result_size=100, elements=None, offset=0, sort=None, include=None):
+    def search(self, args):
         """Searchs a resource by calling fhirstore search function
         """
-        results = self.db.search(
-            self.resource_type, params, result_size, elements, offset, sort, include
-        )
-        return results
-
-    def count(self, params):
-        """Counts a resource by calling fhirstore count function
-        """
-        results = self.db.count(self.resource_type, params)
+        results = self.db.comprehensive_search(self.resource_type, args)
         return results
 
     def history(self):

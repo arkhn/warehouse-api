@@ -1,5 +1,5 @@
 elasticsearch==7.0.5
-fhirstore==0.4.0
+fhirstore==0.4.1
 Flask-Cors==3.0.8
 Flask==1.1.1
 jsonschema==3.0.2
