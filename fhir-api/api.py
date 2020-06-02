@@ -1,18 +1,19 @@
 import logging
 from flask import Blueprint, request, jsonify
+from flask_cors import CORS
 from jsonschema import ValidationError
 
 from fhirstore import NotFoundError
 
+from authentication import auth_required
 from db import get_store
-from errors.operation_outcome import OperationOutcome
+from errors import OperationOutcome, AuthenticationError
 from models import resources_models
 from subsearch.search import (
     process_params,
     resource_count,
     resource_search,
 )
-from flask_cors import CORS
 
 api = Blueprint("api", __name__)
 # enable Cross-Origin Resource Sharing
@@ -21,6 +22,7 @@ CORS(api)
 
 
 @api.route("/<resource_type>/<id>", methods=["GET"])
+@auth_required
 def read(resource_type, id):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
@@ -35,6 +37,7 @@ def read(resource_type, id):
 
 
 @api.route("/<resource_type>/<id>", methods=["PUT"])
+@auth_required
 def update(resource_type, id):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
@@ -51,6 +54,7 @@ def update(resource_type, id):
 
 
 @api.route("/<resource_type>/<id>", methods=["PATCH"])
+@auth_required
 def patch(resource_type, id):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
@@ -67,6 +71,7 @@ def patch(resource_type, id):
 
 
 @api.route("/<resource_type>", methods=["POST"])
+@auth_required
 def create(resource_type):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
@@ -83,6 +88,7 @@ def create(resource_type):
 
 
 @api.route("/<resource_type>/<id>", methods=["DELETE"])
+@auth_required
 def delete(resource_type, id):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
@@ -94,6 +100,7 @@ def delete(resource_type, id):
 
 
 @api.route("/<resource_type>", methods=["GET"])
+@auth_required
 def search(resource_type):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
@@ -121,6 +128,7 @@ def search(resource_type):
 
 
 @api.route("/", methods=["GET"])
+@auth_required
 def search_multiple_resources():
     search_args = {key: request.args.getlist(key) for key in request.args.keys()}
     if not search_args.get("_type"):
@@ -161,11 +169,13 @@ def search_multiple_resources():
 
 
 @api.route("/list-collections", methods=["GET"])
+@auth_required
 def list_collections():
     return jsonify(list(resources_models.keys()))
 
 
 @api.route("/upload-bundle", methods=["POST"])
+@auth_required
 def upload_bundle():
     # TODO methodology to avoid/process huge bundles
     bundle_data = request.get_json(force=True)
@@ -186,3 +196,8 @@ def upload_bundle():
 @api.errorhandler(OperationOutcome)
 def handle_bad_request(e):
     return str(e), 400
+
+
+@api.errorhandler(AuthenticationError)
+def handle_not_authorized(e):
+    return str(e), 401
