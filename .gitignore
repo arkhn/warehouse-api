@@ -85,3 +85,6 @@ venv.bak/
 # virtualenv
 bin/
 include/
+
+# node_modules
+**/node_modules/

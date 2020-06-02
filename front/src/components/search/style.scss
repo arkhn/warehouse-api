@@ -1,0 +1,17 @@
+.search-view {
+  margin: 5% 20%;
+  
+  justify-content: center;
+
+  .search-bar {
+    margin: 50px 0;
+
+    .search-button {
+      width: 20px;
+    }
+  }
+  
+  .entry-id {
+    cursor: pointer;
+  }
+}

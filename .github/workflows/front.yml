@@ -1,0 +1,60 @@
+name: front-api
+
+on: [push]
+
+jobs:
+  build:
+    name: Build front api
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v1
+        with:
+          path: front/node_modules
+          key: ${{ runner.OS }}-${{ matrix.node-version}}-node-modules-${{ hashFiles('front/yarn.lock') }}
+
+      - name: Install Dependencies
+        run: |
+          cd front
+          yarn install
+
+      - name: Build
+        run: |
+          cd front
+          yarn build
+
+  publish:
+    name: Build and publish
+    env:
+      IMAGE: arkhn/front-api
+    runs-on: ubuntu-18.04
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Build
+        run: |
+          cd front/
+          yarn docker:build
+  
+      - name: Tag docker images
+        run: |
+          docker tag $IMAGE:latest $IMAGE:$GITHUB_SHA
+
+      - name: Publish to the docker hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+          docker push $IMAGE:latest
