@@ -5,7 +5,7 @@ import os
 
 from errors import AuthenticationError
 
-JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY")
+JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY").replace('\\n', '\n')
 
 
 def auth_required(f):
@@ -19,7 +19,7 @@ def auth_required(f):
         token = auth_header[len(prefix):]
 
         try:
-            jwt.decode(token, JWT_PUBLIC_KEY, algorithms=["AES256"])
+            jwt.decode(token, JWT_PUBLIC_KEY, algorithms=["ES256"])
         except jwt.DecodeError:
             raise AuthenticationError("Failed to verify token.")
 

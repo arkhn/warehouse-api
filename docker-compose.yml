@@ -26,6 +26,18 @@ services:
     networks:
       - arkhn
 
+  front-api:
+    build:
+      context: ./front
+    image: arkhn/front-api:latest
+    container_name: front-api
+    env_file:
+      - front/.env
+    ports:
+      - 2001:2001
+    networks:
+      - arkhn
+
   mongo:
     image: mongo
     container_name: mongo

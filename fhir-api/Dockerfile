@@ -3,8 +3,8 @@ FROM alpine:3.10
 RUN apk update
 
 RUN apk add --no-cache \
-    build-base \
-    linux-headers \
+    build-base linux-headers \
+    gcc musl-dev libffi-dev openssl-dev \
     python3-dev \
     bash
 
