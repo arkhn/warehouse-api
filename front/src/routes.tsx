@@ -10,7 +10,7 @@ const Routes = () => (
   <BrowserRouter>
     <Switch>
       <Route path="/login" component={Authentication} />
-      <PrivateRoute path="/search" component={Search} />
+      <PrivateRoute exact path="/" component={Search} />
     </Switch>
   </BrowserRouter>
 );
