@@ -7,7 +7,7 @@ import Authentication from './components/authentication';
 import Search from './components/search';
 
 const Routes = () => (
-  <BrowserRouter basename='front-api'>
+  <BrowserRouter basename="/front-api">
     <Switch>
       <Route path="/login" component={Authentication} />
       <PrivateRoute exact path="/" component={Search} />

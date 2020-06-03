@@ -57,7 +57,7 @@ const Authentication = () => {
     if (data.login.token) {
       const token = data.login.token;
       localStorage.setItem(TOKEN_STORAGE_KEY, token);
-      history.push('/search');
+      history.push('/');
     }
   };
 
