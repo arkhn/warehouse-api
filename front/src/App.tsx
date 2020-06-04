@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { ApolloProvider } from 'react-apollo';
 import { HttpLink, InMemoryCache, ApolloClient } from 'apollo-client-preset';
 import { ApolloLink } from 'apollo-link';
@@ -7,6 +8,15 @@ import { onError } from 'apollo-link-error';
 import Routes from './routes';
 
 import { AUTH_API_URL, TOKEN_STORAGE_KEY } from './constants';
+
+// AXIOS
+
+// Interceptor to add authorization header for each requests
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
 // APOLLO
 

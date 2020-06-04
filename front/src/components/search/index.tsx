@@ -87,7 +87,6 @@ const Search = (): React.ReactElement => {
               }}
             />
             <Button
-              className="search-button"
               variant="contained"
               color="default"
               startIcon={<SearchIcon />}
