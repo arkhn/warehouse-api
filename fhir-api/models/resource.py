@@ -61,7 +61,7 @@ class Resource:
         if resource.get("id") and resource.get("id") != self.id:
             raise OperationOutcome("Resource id and update payload do not match")
 
-        self.resource = self.db.update(self.resource_type, self.id, resource)
+        self.db.update(self.resource_type, self.id, resource)
         return self
 
     def patch(self, patch):
@@ -74,7 +74,7 @@ class Resource:
         if patch.get("id") is not None and patch.get("id") != self.id:
             raise OperationOutcome("Resource id and patch payload do not match")
 
-        self.resource = self.db.patch(self.resource_type, self.id, patch)
+        self.db.patch(self.resource_type, self.id, patch)
         return self
 
     def delete(self):

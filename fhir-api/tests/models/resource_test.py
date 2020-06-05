@@ -101,16 +101,12 @@ be provided",
         test_id = {"id": "id"}
         resource_data = {"my": "resource", **test_id}
         update_data = {"test": "two"}
-        update_ret_data = {**test_id, **resource_data, **update_data}
-        mock_get_store.return_value.update.return_value = update_ret_data
         r = Resource(resource=resource_data)
 
         r = r.update(update_data)
         mock_get_store.return_value.update.assert_called_once_with(
             "Resource", test_id["id"], update_data
         )
-        assert r.resource["test"] == update_ret_data["test"]
-        assert r.resource["my"] == update_ret_data["my"]
         assert r.id == test_id["id"]
 
     def test_update_with_id(self, mock_get_store):
@@ -119,16 +115,12 @@ be provided",
         test_id = {"id": "id"}
         resource_data = {"my": "resource"}
         update_data = {"test": "two"}
-        update_ret_data = {**update_data, **resource_data, **test_id}
-        mock_get_store.return_value.update.return_value = update_ret_data
         r = Resource(id=test_id["id"], resource=resource_data)
 
         r = r.update(update_data)
         mock_get_store.return_value.update.assert_called_once_with(
             "Resource", test_id["id"], update_data
         )
-        assert r.resource["test"] == update_ret_data["test"]
-        assert r.resource["my"] == update_ret_data["my"]
         assert r.id == test_id["id"]
 
     def test_update_id_dont_match(self, mock_get_store):
@@ -160,15 +152,12 @@ update a resource",
         """
         test_id = {"id": "id"}
         patch_data = {"test": "two"}
-        patch_ret_data = {**patch_data, **test_id}
-        mock_get_store.return_value.patch.return_value = patch_ret_data
         r = Resource(id=test_id["id"])
 
         r = r.patch(patch_data)
         mock_get_store.return_value.patch.assert_called_once_with(
             "Resource", test_id["id"], patch_data
         )
-        assert r.resource == patch_ret_data
         assert r.id == test_id["id"]
 
     def test_patch_missing_data(self, mock_get_store):
