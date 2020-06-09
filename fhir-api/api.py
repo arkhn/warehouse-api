@@ -118,8 +118,8 @@ def search(resource_type):
             key_word, os.environ.get("DOCUMENTS_PATH")
         )
         document_names = []
-        for result in results[1:]: # remove the header
-            document_name = re.search("documents\/\d+\.pdf", result[0]).group(0)
+        for result in results[1:]:  # remove the header
+            document_name = re.search(r"documents\/\d+\.pdf", result[0]).group(0)
             document_names.append(document_name)
 
         store = get_store()
