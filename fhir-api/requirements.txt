@@ -5,6 +5,7 @@ Flask==1.1.1
 jsonschema==3.0.2
 PyJWT[crypto]==1.7.1
 pymongo==3.9.0
+pysin==1.4.0
 urllib3==1.25.7
 uWSGI==2.0.18
 uwsgidecorators==1.1.0

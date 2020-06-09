@@ -118,16 +118,14 @@ def search(resource_type):
             key_word, os.environ.get("DOCUMENTS_PATH")
         )
         document_names = []
-        for result in results[1:]:
+        for result in results[1:]: # remove the header
             document_name = re.search("documents\/\d+\.pdf", result[0]).group(0)
             document_names.append(document_name)
 
-        print(document_names)
         store = get_store()
         document_references = store.db[resource_type].find(
-            {"content.attachment.url": document_names[0]}
+            {"content.attachment.url": {"$in": document_names}}
         )
-        # document_references = store.db["Patient"].find({"gender": "male"})
 
         entries = []
         for document_reference in document_references:
