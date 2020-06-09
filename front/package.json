@@ -31,9 +31,13 @@
     "react-apollo": "^3.1.5",
     "react-dom": "^16.13.1",
     "react-json-view": "^1.19.1",
+    "react-redux": "^7.2.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
+    "redux": "^4.0.5",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
     "serve": "^11.3.1",
     "typescript": "~3.7.2",
     "use-react-router": "^1.0.7"
@@ -54,8 +58,10 @@
     ]
   },
   "devDependencies": {
+    "@types/react-redux": "^7.1.9",
     "@types/react-router": "^5.1.7",
     "@types/react-router-dom": "^5.1.5",
+    "@types/redux-logger": "^3.0.8",
     "@typescript-eslint/eslint-plugin": "^3.0.2",
     "@typescript-eslint/parser": "^3.0.2",
     "eslint-config-prettier": "^6.11.0",
