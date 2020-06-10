@@ -1,4 +1,6 @@
 import logging
+import os
+import re
 
 import elasticsearch
 from flask import Blueprint, request, jsonify
@@ -12,6 +14,8 @@ from authentication import auth_required
 from db import get_store
 from errors import OperationOutcome, AuthenticationError
 from models import resources_models
+
+from pysin import search as document_search
 
 api = Blueprint("api", __name__)
 # enable Cross-Origin Resource Sharing
@@ -107,6 +111,27 @@ def search(resource_type):
         return jsonify(bundle.content)
     search_args = SearchArguments()
     search_args.parse(request.args, resource_type)
+
+    if resource_type == "DocumentReference" and request.args.get("$search"):
+        key_word = request.args.get("$search")
+        results, count_dict = document_search(key_word, os.environ.get("DOCUMENTS_PATH"))
+        document_names = []
+        for result in results[1:]:  # remove the header
+            document_name = re.search(r"documents\/\d+\.pdf", result[0]).group(0)
+            document_names.append(document_name)
+
+        store = get_store()
+        document_references = store.db[resource_type].find(
+            {"content.attachment.url": {"$in": document_names}}
+        )
+        entries = []
+        for document_reference in document_references:
+            del document_reference["_id"]
+            entries.append({"resource": document_reference, "search": {"mode": "match"}})
+        bundle.content["entry"] = entries
+        bundle.content["total"] = count_dict["nb"]
+
+        return jsonify(bundle.content)
 
     Model = resources_models[resource_type]
     try:

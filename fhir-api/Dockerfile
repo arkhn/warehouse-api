@@ -6,7 +6,8 @@ RUN apk add --no-cache \
     build-base linux-headers \
     gcc musl-dev libffi-dev openssl-dev \
     python3-dev \
-    bash
+    bash \
+    postgresql-dev poppler-dev
 
 RUN addgroup -S api_group && adduser -S api_user -G api_group
 
