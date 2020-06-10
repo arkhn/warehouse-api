@@ -1,28 +1,43 @@
-import Button from '@material-ui/core/Button';
-import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import SearchIcon from '@material-ui/icons/Search';
+import Paper from '@material-ui/core/Paper';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
 
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import FhirObject from './fhirObject';
 import AppBar from '../appBar';
+import SearchParameterTable from './searchParameterTable';
 
 import { FHIR_API_URL } from '../../constants';
+import { IReduxStore } from '../../types';
 
 import './style.scss';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      '& > *': {
-        margin: theme.spacing(1),
-        width: '25ch',
-      },
+    resourceSelect: {
+      margin: '30px 0px',
+      width: '60%',
+    },
+    paperForm: {
+      padding: '2px 4px',
       display: 'flex',
+      alignItems: 'center',
+      width: '100%',
+    },
+    iconButton: {
+      padding: 10,
+    },
+    alertError: {
+      margin: '30px 0px',
     },
   })
 );
@@ -30,11 +45,16 @@ const useStyles = makeStyles((theme: Theme) =>
 const Search = (): React.ReactElement => {
   const classes = useStyles();
 
-  const [searchParameters, setSearchParameters] = useState('');
+  const searchParameters = useSelector(
+    (state: IReduxStore) => state.searchParameters
+  );
+
   const [fhirCollections, setFhirCollections] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState('');
   const [fhirBundle, setFhirBundle] = useState({} as any);
-  const [apiError, setApiError] = useState(false);
+  const [apiErrors, setApiErrors] = useState([] as string[]);
+
+  const [fhirUrl, setfFhirUrl] = useState('');
 
   const getFhirCollections = async () => {
     try {
@@ -50,17 +70,53 @@ const Search = (): React.ReactElement => {
     getFhirCollections();
   }, []);
 
-  const executeFhirQuery = async () => {
-    const fhirUrl = `${FHIR_API_URL}${
-      selectedCollection ? '/' + selectedCollection : ''
-    }?${searchParameters}`;
+  useEffect(() => {
+    const searchUrl = searchParameters
+      .map((param) => {
+        let { expression } = param.parameter;
+        if (!expression || !param.value) return '';
+        // Remove |
+        expression = expression.split(' |')[0];
+        const path = expression.substring(expression.indexOf('.') + 1);
+        return `${path}=${param.value}`;
+      })
+      .filter(Boolean);
+    setfFhirUrl(
+      `${FHIR_API_URL}${selectedCollection ? '/' + selectedCollection : ''}${
+        searchUrl.length > 0 ? '?' + searchUrl.join('&') : ''
+      }`
+    );
+  }, [selectedCollection, searchParameters]);
 
+  const executeFhirQuery = async () => {
+    setApiErrors([]);
+    let responseBundle: any;
     try {
       const response: any = await axios.get(fhirUrl);
-      setFhirBundle(response.data);
+      responseBundle = response.data;
     } catch (err) {
       const errMessage = err.response ? err.response.data : err.message;
-      setApiError(errMessage);
+      setApiErrors((apiErrors) => [...apiErrors, errMessage]);
+    }
+
+    if (responseBundle.issue) {
+      setApiErrors((apiErrors) => [
+        ...apiErrors,
+        responseBundle.issue.diagnostic,
+      ]);
+    } else {
+      responseBundle.entry.forEach((entry: any) => {
+        if (entry.resource.issue) {
+          setApiErrors((apiErrors) => [
+            ...apiErrors,
+            entry.resource.issue.details,
+          ]);
+        }
+      });
+      responseBundle.entry = responseBundle.entry.filter(
+        (entry: any) => !entry.resource.issue
+      );
+      setFhirBundle(responseBundle);
     }
   };
 
@@ -69,41 +125,71 @@ const Search = (): React.ReactElement => {
       <AppBar />
       <div className="search-view">
         <div className="search-bar">
-          <form className={classes.root}>
-            <Select
-              native
-              onChange={(c) => setSelectedCollection(c.target.value as string)}
-            >
-              <option value="">Search on all collections</option>
-              {fhirCollections.map((collection) => (
-                <option value={collection}>{`${collection}`}</option>
-              ))}
-            </Select>
+          <Autocomplete
+            key="test"
+            className={classes.resourceSelect}
+            options={[
+              { label: 'No type', value: '' },
+              ...fhirCollections.map((collection) => ({
+                label: collection,
+                value: collection,
+              })),
+            ]}
+            getOptionLabel={(option) => option.label}
+            getOptionSelected={(option: any, value: any) =>
+              option.value === value.value
+            }
+            renderInput={(params) => (
+              <TextField {...params} label="Resource type" variant="outlined" />
+            )}
+            onChange={(_: any, newValue: any) => {
+              setSelectedCollection(newValue?.value || '');
+            }}
+          />
+          <SearchParameterTable type={selectedCollection} />
+          <Paper component="form" elevation={0} className={classes.paperForm}>
             <TextField
-              label="search parameters"
-              onChange={(event: React.FormEvent<HTMLElement>) => {
-                const target = event.target as HTMLInputElement;
-                setSearchParameters(target.value);
+              value={fhirUrl}
+              fullWidth={true}
+              onChange={(event: any) => {
+                setfFhirUrl(event.target.value);
+              }}
+              onKeyPress={(ev) => {
+                if (ev.key === 'Enter') {
+                  ev.preventDefault();
+                  executeFhirQuery();
+                }
               }}
             />
-            <Button
-              variant="contained"
-              color="default"
-              startIcon={<SearchIcon />}
+            <IconButton
+              className={classes.iconButton}
+              aria-label="search"
               onClick={executeFhirQuery}
-            />
-          </form>
-          {apiError && <Alert severity="error"> {`${apiError}`} </Alert>}
+            >
+              <SearchIcon />
+            </IconButton>
+          </Paper>
+          {apiErrors.length > 0 &&
+            apiErrors.map((apiError) => (
+              <Alert severity="error" className={classes.alertError}>
+                {`${apiError}`}
+              </Alert>
+            ))}
         </div>
         {fhirBundle.entry && (
           <div>
-            {`Found ${fhirBundle.total} results`}
+            <Typography paragraph>
+              <Box
+                fontWeight="fontWeightLight"
+                fontStyle="italic"
+                color="text.secondary"
+                m={1}
+              >
+                {`Found ${fhirBundle.total} result(s)`}
+              </Box>
+            </Typography>
             {fhirBundle.entry.map((entry: any, index: number) => (
-              <FhirObject
-                fhirJson={entry.resource}
-                title={`result ${index + 1}`}
-                key={`result ${index + 1}`}
-              />
+              <FhirObject fhirJson={entry.resource} key={index} />
             ))}
           </div>
         )}

@@ -3,7 +3,9 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 
 import useRouter from 'use-react-router';
 
@@ -23,6 +25,9 @@ const useStyles = makeStyles((theme: Theme) =>
     logo: {
       maxWidth: 160,
       marginRight: theme.spacing(1),
+    },
+    icons: {
+      margin: '0px 5px 0px 0px',
     },
   })
 );
@@ -49,12 +54,15 @@ const FrontApiBar = () => {
           <Typography variant="h6" className={classes.title}>
             Search API
           </Typography>
-          <Button color="inherit" href="https://www.hl7.org/fhir/search.html">
-            Documentation
-          </Button>
-          <Button color="inherit" onClick={() => logout()}>
-            Deconnexion
-          </Button>
+          <IconButton
+            color="inherit"
+            href="https://www.hl7.org/fhir/search.html"
+          >
+            <LibraryBooksIcon className={classes.icons} /> {'Doc'}
+          </IconButton>
+          <IconButton color="inherit" onClick={() => logout()}>
+            <ExitToAppIcon className={classes.icons} /> {'Logout'}
+          </IconButton>
         </Toolbar>
       </AppBar>
     </div>

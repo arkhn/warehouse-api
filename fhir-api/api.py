@@ -134,7 +134,7 @@ def search(resource_type):
             document_reference["description"] = context
             entries.append({"resource": document_reference, "search": {"mode": "match"}})
         bundle.content["entry"] = entries
-        bundle.content["total"] = count_dict
+        bundle.content["total"] = count_dict["nb"]
 
         return jsonify(bundle.content)
 

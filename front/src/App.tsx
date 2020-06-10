@@ -4,8 +4,12 @@ import { ApolloProvider } from 'react-apollo';
 import { HttpLink, InMemoryCache, ApolloClient } from 'apollo-client-preset';
 import { ApolloLink } from 'apollo-link';
 import { onError } from 'apollo-link-error';
+import { combineReducers, createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import { createLogger } from 'redux-logger';
 
 import Routes from './routes';
+import searchParametersReducer from './redux/reducers';
 
 import { AUTH_API_URL, TOKEN_STORAGE_KEY } from './constants';
 
@@ -59,6 +63,33 @@ if (process.env.NODE_ENV === 'development') {
 
 links.push(httpLinkAuth);
 
+// REDUX
+const middlewares = [
+  function thunkMiddleware({ dispatch, getState }: any) {
+    return function (next: any) {
+      return function (action: any) {
+        return typeof action === 'function'
+          ? action(dispatch, getState)
+          : next(action);
+      };
+    };
+  },
+];
+if (process.env.NODE_ENV === 'development') {
+  // Log redux dispatch only in development
+  middlewares.push(createLogger({}));
+}
+
+const finalCreateStore = applyMiddleware(...middlewares)(createStore);
+
+const mainReducer = combineReducers({
+  searchParameters: searchParametersReducer,
+});
+
+const configureStore = () => {
+  return finalCreateStore(mainReducer);
+};
+
 // Client
 export const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -67,7 +98,9 @@ export const client = new ApolloClient({
 });
 
 export default () => (
-  <ApolloProvider client={client}>
-    <Routes />
-  </ApolloProvider>
+  <Provider store={configureStore()}>
+    <ApolloProvider client={client}>
+      <Routes />
+    </ApolloProvider>
+  </Provider>
 );
