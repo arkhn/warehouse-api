@@ -116,17 +116,22 @@ def search(resource_type):
         key_word = request.args.get("$search")
         results, count_dict = document_search(key_word, os.environ.get("DOCUMENTS_PATH"))
         document_names = []
+        contexts = []
         for result in results[1:]:  # remove the header
-            document_name = re.search(r"documents\/\d+\.pdf", result[0]).group(0)
+            path, row, context = result
+            document_name = re.search(r"documents\/\d+\.pdf", path).group(0)
             document_names.append(document_name)
+            contexts.append(context)
 
         store = get_store()
         document_references = store.db[resource_type].find(
             {"content.attachment.url": {"$in": document_names}}
         )
+
         entries = []
-        for document_reference in document_references:
+        for document_reference, context in zip(document_references, contexts):
             del document_reference["_id"]
+            document_reference["description"] = context
             entries.append({"resource": document_reference, "search": {"mode": "match"}})
         bundle.content["entry"] = entries
         bundle.content["total"] = count_dict["nb"]
@@ -173,7 +178,7 @@ def search_multiple_resources():
     resources = request.args["_type"].split(",")
     if len(resources) < 1:
         bundle.fill_error(
-            code="structure", diagnostic="Provide at least one resource in _type parameter",
+            code="structure", diagnostic="Provide at least one resource in _type parameter"
         )
         return jsonify(bundle.content)
 

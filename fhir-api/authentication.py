@@ -5,7 +5,7 @@ import os
 
 from errors import AuthenticationError
 
-JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY").replace('\\n', '\n')
+JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY").replace("\\n", "\n")
 
 
 def auth_required(f):
