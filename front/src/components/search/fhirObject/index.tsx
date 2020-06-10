@@ -51,7 +51,7 @@ const FhirObject = ({ fhirJson }: Props): React.ReactElement => {
         </Typography>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails>
-        <ReactJson src={fhirJson} name={false} />
+        {isExpanded && <ReactJson src={fhirJson} name={false} />}
       </ExpansionPanelDetails>
     </ExpansionPanel>
   );
