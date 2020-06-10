@@ -154,6 +154,12 @@ const Search = (): React.ReactElement => {
               onChange={(event: any) => {
                 setfFhirUrl(event.target.value);
               }}
+              onKeyPress={(ev) => {
+                if (ev.key === 'Enter') {
+                  ev.preventDefault();
+                  executeFhirQuery();
+                }
+              }}
             />
             <IconButton
               className={classes.iconButton}
