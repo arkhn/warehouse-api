@@ -5,7 +5,7 @@ import os
 
 from errors import AuthenticationError
 
-JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY").replace('\\n', '\n')
+JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY").replace("\\n", "\n")
 
 
 def auth_required(f):
@@ -16,7 +16,7 @@ def auth_required(f):
         if not auth_header.startswith(prefix):
             raise AuthenticationError("Authorization header malformed or unexisting.")
 
-        token = auth_header[len(prefix):]
+        token = auth_header[len(prefix) :]
 
         try:
             jwt.decode(token, JWT_PUBLIC_KEY, algorithms=["ES256"])
