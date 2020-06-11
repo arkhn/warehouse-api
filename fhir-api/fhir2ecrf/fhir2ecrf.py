@@ -73,7 +73,7 @@ class FHIR2eCRF:
         logging.basicConfig()
         fhir2ecrf = FHIR2eCRF(token=token, fhir_api_url=fhir_api_url)
         df = fhir2ecrf.query(config_front)
-    """ # noqa
+    """  # noqa
 
     def __init__(self, token: str = None, fhir_api_url: str = None):
         """Metadata loading
@@ -81,7 +81,7 @@ class FHIR2eCRF:
         Args:
             token (str, optional): bearer token authentication if necessary. Defaults to None.
             fhir_api_url (str, optional): The Service Base URL (e.g. http://hapi.fhir.org/baseR4/). Defaults to None.
-        """ # noqa
+        """  # noqa
         self.token = token
         self.fhir_api_url = fhir_api_url
         self.df_crf_attributes = self._load_crf_attributes()
@@ -126,7 +126,7 @@ class FHIR2eCRF:
 
         Returns:
             pd.DataFrame: pandas dataframe containing the correspondant data
-        """ # noqa
+        """  # noqa
         post_treatements, columns_renaming, config = self._create_config_fhir2dataset(config_front)
         cols_order = [attribute["customName"] for attribute in config_front["attributes"]]
 
@@ -151,6 +151,8 @@ class FHIR2eCRF:
         df = self.df_crf_attributes
         post_treatement = defaultdict(list)
         patients_id = config_front["idPatient"]
+        assert len(patients_id) > 0, "At least one patient ID must be filled in the config_front"
+
         attributes_keep = [
             attribute["officialName"].lower() for attribute in config_front["attributes"]
         ]
