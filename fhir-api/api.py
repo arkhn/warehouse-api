@@ -124,14 +124,15 @@ def search(resource_type):
     search_args = SearchArguments()
     search_args.parse(request.args, resource_type)
 
+    # FIXME cleanup
     if resource_type == "DocumentReference" and request.args.get("$search"):
         key_word = request.args.get("$search")
         results, count_dict = document_search(key_word, os.environ.get("DOCUMENTS_PATH"))
         document_names = []
         contexts = []
         for result in results[1:]:  # remove the header
-            path, row, context = result
-            document_name = re.search(r"documents\/\d+\.pdf", path).group(0)
+            path, _, context = result
+            document_name = re.search(r"\d+\.pdf", path).group(0)
             document_names.append(document_name)
             contexts.append(context)
 
