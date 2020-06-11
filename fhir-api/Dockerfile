@@ -1,15 +1,10 @@
-FROM alpine:3.10
+FROM python:3.8-slim
 
-RUN apk update
+RUN apt-get update \
+    && apt-get -y install build-essential libpoppler-cpp-dev pkg-config bash
 
-RUN apk add --no-cache \
-    build-base linux-headers \
-    gcc musl-dev libffi-dev openssl-dev \
-    python3-dev \
-    bash \
-    postgresql-dev poppler-dev
-
-RUN addgroup -S api_group && adduser -S api_user -G api_group
+RUN groupadd api_group
+RUN useradd -G api_group api_user
 
 WORKDIR /srv/flask_app
 ENV PYTHONPATH "${PYTHONPATH}:/srv/flask_app"

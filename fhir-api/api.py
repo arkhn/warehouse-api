@@ -14,8 +14,12 @@ from authentication import auth_required
 from db import get_store
 from errors import OperationOutcome, AuthenticationError
 from models import resources_models
+from fhir2ecrf import FHIR2eCRF
 
 from pysin import search as document_search
+
+FHIR_API_URL = os.getenv("FHIR_API_URL")
+FHIR_API_TOKEN = os.getenv("FHIR_API_TOKEN")
 
 api = Blueprint("api", __name__)
 # enable Cross-Origin Resource Sharing
@@ -77,6 +81,14 @@ def patch(resource_type, id):
 def create(resource_type):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
+
+    # FIXME clean all of this
+    if resource_type == "Group" and "$export" in request.args:
+        f = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
+        params = request.get_json(force=True)
+        df = f.query(params)
+        # TODO anonymize dataset
+        return jsonify({"df": df.to_dict(orient="list")})
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
