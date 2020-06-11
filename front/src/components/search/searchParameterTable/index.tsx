@@ -133,6 +133,7 @@ const SearchParameterTable = ({ type }: any) => {
         <TableBody key="tableBody">
           {Array.from(Array(searchParameters.length).keys()).map((index) => (
             <RenderRow
+              key={index}
               index={index}
               value={searchParameters[index].value}
               type={type}

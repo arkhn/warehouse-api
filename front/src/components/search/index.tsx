@@ -3,17 +3,19 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import SearchIcon from '@material-ui/icons/Search';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Paper from '@material-ui/core/Paper';
+import IconButton from '@material-ui/core/IconButton';
 
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import FhirObject from './fhirObject';
 import AppBar from '../appBar';
+import SwitchViews from '../switchViews';
+import FhirObject from './fhirObject';
 import SearchParameterTable from './searchParameterTable';
 
 import { FHIR_API_URL } from '../../constants';
@@ -130,6 +132,7 @@ const Search = (): React.ReactElement => {
     <React.Fragment>
       <AppBar />
       <div className="search-view">
+        <SwitchViews />
         <div className="search-bar">
           <Autocomplete
             key="test"
@@ -153,7 +156,7 @@ const Search = (): React.ReactElement => {
             }}
           />
           <SearchParameterTable type={selectedCollection} />
-          {/* <Paper component="form" elevation={0} className={classes.paperForm}>
+          <Paper component="form" elevation={0} className={classes.paperForm}>
             <TextField
               value={fhirUrl}
               fullWidth={true}
@@ -174,15 +177,15 @@ const Search = (): React.ReactElement => {
             >
               <SearchIcon />
             </IconButton>
-          </Paper> */}
-          <Button
+          </Paper>
+          {/* <Button
             className={classes.searchButton}
             aria-label="search"
             variant="contained"
             onClick={executeFhirQuery}
           >
             <SearchIcon />
-          </Button>
+          </Button> */}
           {apiErrors.length > 0 &&
             apiErrors.map((apiError) => (
               <Alert severity="error" className={classes.alertError}>

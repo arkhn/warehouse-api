@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import AppBar from '../appBar';
+import SwitchViews from '../switchViews';
 import DocumentResults from './searchResults';
 import PdfViewer from './pdfViewer';
 import SearchBar from './searchBar';
@@ -17,6 +18,7 @@ const DocumentSearch = (): React.ReactElement => {
     <React.Fragment>
       <AppBar />
       <div className="search-documents">
+        <SwitchViews />
         <SearchBar
           onUpdate={(documentLinks) => {
             setDocumentLinks(documentLinks);
