@@ -1,0 +1,17 @@
+.search-documents {
+  margin: 5% 10%;
+  
+  justify-content: center;
+
+  .results-div {
+    display: flex;
+    
+    .results-div {
+      flex: 1
+    }
+    .pdf-preview {
+      flex: 1
+    }
+
+  }
+}

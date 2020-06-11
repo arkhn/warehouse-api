@@ -26,3 +26,8 @@ export interface SearchParameter {
   name: string;
   expression: string;
 }
+
+export interface DocumentLink {
+  url: string;
+  context: string;
+}

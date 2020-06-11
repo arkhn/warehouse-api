@@ -33,7 +33,7 @@ jobs:
       - name: Build
         run: |
           cd front
-          yarn build
+          CI=false yarn build
 
   publish:
     name: Build and publish
@@ -48,7 +48,7 @@ jobs:
       - name: Build
         run: |
           cd front/
-          yarn docker:build
+          CI=false yarn docker:build
   
       - name: Tag docker images
         run: |
