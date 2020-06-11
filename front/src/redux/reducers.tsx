@@ -27,6 +27,9 @@ export const searchParametersReducer = (
 
     case 'DELETE_PARAMETER': {
       state.splice(action.payload.index, 1);
+      if (state.length === 0) {
+        state = [{ parameter: { name: '', expression: '' }, value: '' }];
+      }
       return [...state];
     }
 

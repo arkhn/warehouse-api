@@ -4,11 +4,14 @@ import Alert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import React, { useCallback, useState } from 'react';
 import axios from 'axios';
 
 import { FHIR_API_URL } from '../../../constants';
 import { DocumentLink } from '../../../types';
+
+import './style.scss';
 
 interface Props {
   onUpdate: (urls: DocumentLink[]) => void;
@@ -17,10 +20,10 @@ interface Props {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     paperForm: {
+      margin: '0% 20%',
       padding: '2px 4px',
       display: 'flex',
       alignItems: 'center',
-      width: '100%',
     },
     iconButton: {
       padding: 10,
@@ -36,11 +39,14 @@ const SearchBar = ({ onUpdate }: Props): React.ReactElement => {
 
   const [searchText, setSearchText] = useState('');
   const [apiErrors, setApiErrors] = useState([] as string[]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const executeDocumentSearch = useCallback(async () => {
     if (!searchText) return;
 
     setApiErrors([]);
+    onUpdate([]);
+    setIsLoading(true);
     let responseBundle: any;
     try {
       const response: any = await axios.get(
@@ -54,7 +60,6 @@ const SearchBar = ({ onUpdate }: Props): React.ReactElement => {
 
     if (responseBundle.total === 0) {
       setApiErrors((apiErrors) => [...apiErrors, 'No document found.']);
-      onUpdate([]);
     } else {
       onUpdate(
         responseBundle.entry.map((entry: any) => ({
@@ -63,12 +68,15 @@ const SearchBar = ({ onUpdate }: Props): React.ReactElement => {
         }))
       );
     }
+    setIsLoading(false);
   }, [searchText, onUpdate]);
 
   return (
     <React.Fragment>
       <Paper component="form" elevation={0} className={classes.paperForm}>
         <TextField
+          label="Recherche par mot clé"
+          placeholder="ex: fumeur, diabete, ..."
           value={searchText}
           fullWidth={true}
           onChange={(event: any) => {
@@ -95,6 +103,11 @@ const SearchBar = ({ onUpdate }: Props): React.ReactElement => {
             {`${apiError}`}
           </Alert>
         ))}
+      {isLoading && (
+        <div className="spinner">
+          <CircularProgress />
+        </div>
+      )}
     </React.Fragment>
   );
 };

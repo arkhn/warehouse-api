@@ -44,7 +44,7 @@ const FrontApiBar = () => {
 
   return (
     <div className={classes.root}>
-      <AppBar position="static" style={{ background: '#10161A' }}>
+      <AppBar position="static" style={{ background: '#F9B5ACFF' }}>
         <Toolbar>
           <img
             src="arkhn_logo_only_white.svg"
@@ -57,11 +57,13 @@ const FrontApiBar = () => {
           <IconButton
             color="inherit"
             href="https://www.hl7.org/fhir/search.html"
+            target="_blank"
           >
-            <LibraryBooksIcon className={classes.icons} /> {'Doc'}
+            <LibraryBooksIcon className={classes.icons} />
+            {'Doc fhir'}
           </IconButton>
           <IconButton color="inherit" onClick={() => logout()}>
-            <ExitToAppIcon className={classes.icons} /> {'Logout'}
+            <ExitToAppIcon className={classes.icons} /> {'Deconnexion'}
           </IconButton>
         </Toolbar>
       </AppBar>

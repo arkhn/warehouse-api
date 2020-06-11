@@ -3,10 +3,10 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import SearchIcon from '@material-ui/icons/Search';
-import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -39,6 +39,9 @@ const useStyles = makeStyles((theme: Theme) =>
     alertError: {
       margin: '30px 0px',
     },
+    searchButton: {
+      float: 'right',
+    },
   })
 );
 
@@ -53,8 +56,8 @@ const Search = (): React.ReactElement => {
   const [selectedCollection, setSelectedCollection] = useState('');
   const [fhirBundle, setFhirBundle] = useState({} as any);
   const [apiErrors, setApiErrors] = useState([] as string[]);
-
   const [fhirUrl, setfFhirUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const getFhirCollections = async () => {
     try {
@@ -90,6 +93,8 @@ const Search = (): React.ReactElement => {
 
   const executeFhirQuery = async () => {
     setApiErrors([]);
+    setFhirBundle([]);
+    setIsLoading(true);
     let responseBundle: any;
     try {
       const response: any = await axios.get(fhirUrl);
@@ -118,6 +123,7 @@ const Search = (): React.ReactElement => {
       );
       setFhirBundle(responseBundle);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -147,7 +153,7 @@ const Search = (): React.ReactElement => {
             }}
           />
           <SearchParameterTable type={selectedCollection} />
-          <Paper component="form" elevation={0} className={classes.paperForm}>
+          {/* <Paper component="form" elevation={0} className={classes.paperForm}>
             <TextField
               value={fhirUrl}
               fullWidth={true}
@@ -168,7 +174,15 @@ const Search = (): React.ReactElement => {
             >
               <SearchIcon />
             </IconButton>
-          </Paper>
+          </Paper> */}
+          <Button
+            className={classes.searchButton}
+            aria-label="search"
+            variant="contained"
+            onClick={executeFhirQuery}
+          >
+            <SearchIcon />
+          </Button>
           {apiErrors.length > 0 &&
             apiErrors.map((apiError) => (
               <Alert severity="error" className={classes.alertError}>
@@ -176,6 +190,11 @@ const Search = (): React.ReactElement => {
               </Alert>
             ))}
         </div>
+        {isLoading && (
+          <div className="spinner">
+            <CircularProgress />
+          </div>
+        )}
         {fhirBundle.entry && (
           <div>
             <Typography paragraph>

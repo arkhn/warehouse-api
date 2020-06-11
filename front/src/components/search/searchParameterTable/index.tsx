@@ -48,6 +48,12 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingTop: '5px',
       paddingBottom: '5px',
     },
+    addCell: {
+      borderBottom: 'none',
+      paddingTop: '5px',
+      paddingBottom: '5px',
+      width: '15px',
+    },
   })
 );
 
@@ -61,7 +67,7 @@ const RenderRow = ({ index, type }: any) => {
 
   return (
     <TableRow key={index}>
-      <TableCell className={classes.row}>
+      <TableCell className={classes.addCell}>
         {index === searchParameters.length - 1 && (
           <IconButton onClick={() => dispatch(addParameter())}>
             <AddIcon />
