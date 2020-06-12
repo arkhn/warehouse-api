@@ -1,6 +1,8 @@
 import logging
 import os
 import re
+import json
+import requests
 
 import elasticsearch
 from flask import Blueprint, request, jsonify
@@ -15,11 +17,14 @@ from db import get_store
 from errors import OperationOutcome, AuthenticationError
 from models import resources_models
 from fhir2ecrf import FHIR2eCRF
+from arkhn_arx import Anonymizer
 
 from pysin import search as document_search
 
 FHIR_API_URL = os.getenv("FHIR_API_URL")
 FHIR_API_TOKEN = os.getenv("FHIR_API_TOKEN")
+ARX_HOST = os.getenv("ARX_HOST")
+ARX_PORT = os.getenv("ARX_PORT")
 
 api = Blueprint("api", __name__)
 # enable Cross-Origin Resource Sharing
@@ -87,8 +92,13 @@ def create(resource_type):
         f = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
         params = request.get_json(force=True)
         df = f.query(params)
+        try:
+            df, score = Anonymizer(f"{ARX_HOST}:{ARX_PORT}").anonymize_dataset(df, params)
+        except requests.exceptions.RequestException as e:
+            return jsonify({"error": json.loads(str(e))})
+
         # TODO anonymize dataset
-        return jsonify({"df": df.to_dict(orient="list")})
+        return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)

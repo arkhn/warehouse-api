@@ -19,9 +19,22 @@ logger = logging.getLogger(__name__)
 FILENAME_CRF_ATTRIBUTES = "crf_to_config.csv"
 PATH_CRF_ATTRIBUTES = os.path.join(os.path.dirname(__file__), "metadata", FILENAME_CRF_ATTRIBUTES)
 
-MODIFIERS_POSS = ["missing", "exact", "contains", "text", "in", "below", "above", "not-in"]
+MODIFIERS_POSS = [
+    "missing",
+    "exact",
+    "contains",
+    "text",
+    "in",
+    "below",
+    "above",
+    "not-in",
+]
 
-POST_TREAMENTS = {"bool": treatment_bool, "first": treatment_first, "list": treatment_list}
+POST_TREAMENTS = {
+    "bool": treatment_bool,
+    "first": treatment_first,
+    "list": treatment_list,
+}
 
 
 class FHIR2eCRF:
