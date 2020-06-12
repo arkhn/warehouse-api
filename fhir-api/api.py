@@ -17,7 +17,8 @@ from db import get_store
 from errors import OperationOutcome, AuthenticationError
 from models import resources_models
 from fhir2ecrf import FHIR2eCRF
-from arkhn_arx import Anonymizer
+
+# from arkhn_arx import Anonymizer
 
 from pysin import search as document_search
 
@@ -92,13 +93,14 @@ def create(resource_type):
         f = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
         params = request.get_json(force=True)
         df = f.query(params)
-        try:
-            df, score = Anonymizer(f"{ARX_HOST}:{ARX_PORT}").anonymize_dataset(df, params)
-        except requests.exceptions.RequestException as e:
-            return jsonify({"error": json.loads(str(e))})
+        # try:
+        #     df, score = Anonymizer(f"{ARX_HOST}:{ARX_PORT}").anonymize_dataset(df, params)
+        # except requests.exceptions.RequestException as e:
+        #     return jsonify({"error": json.loads(str(e))})
 
         # TODO anonymize dataset
-        return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
+        # return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
+        return jsonify({"df": df.to_dict(orient="list"), "score": 0})
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
