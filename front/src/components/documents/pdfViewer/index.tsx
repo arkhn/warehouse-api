@@ -12,7 +12,7 @@ const PdfViewer = ({ pdfUrl }: Props): React.ReactElement => {
     <div>
       <Document
         file={{
-          url: `https://pyrog.arkhn.com/files/${pdfUrl.replace(
+          url: `https://demo.arkhn.com/files/${pdfUrl.replace(
             'documents/',
             ''
           )}`,
