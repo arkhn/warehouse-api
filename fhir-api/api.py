@@ -93,7 +93,7 @@ def create(resource_type):
         params = request.get_json(force=True)
         df = f.query(params)
         try:
-            df, score = Anonymizer(ARX_HOST, ARX_PORT).anonymize_dataset(df, params)
+            df, score = Anonymizer(f"{ARX_HOST}:{ARX_PORT}").anonymize_dataset(df, params)
         except requests.exceptions.RequestException as e:
             return jsonify({"error": json.loads(str(e))})
 
