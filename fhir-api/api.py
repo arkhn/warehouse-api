@@ -3,6 +3,7 @@ import os
 import re
 import json
 import requests
+import math
 
 import elasticsearch
 from flask import Blueprint, request, jsonify
@@ -100,6 +101,7 @@ def create(resource_type):
 
         # TODO anonymize dataset
         # return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
+        df = df.replace({math.nan: None})
         return jsonify({"df": df.to_dict(orient="list"), "score": 0})
 
     Model = resources_models[resource_type]
