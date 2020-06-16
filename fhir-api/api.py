@@ -23,6 +23,8 @@ from fhir2ecrf import FHIR2eCRF
 
 from pysin import search as document_search
 
+logging.basicConfig(level=logging.DEBUG)
+
 FHIR_API_URL = os.getenv("FHIR_API_URL")
 FHIR_API_TOKEN = os.getenv("FHIR_API_TOKEN")
 ARX_HOST = os.getenv("ARX_HOST")
@@ -35,7 +37,7 @@ CORS(api)
 
 
 @api.route("/<resource_type>/<id>", methods=["GET"])
-@auth_required
+# @auth_required
 def read(resource_type, id):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
