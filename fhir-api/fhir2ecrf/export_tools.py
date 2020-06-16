@@ -3,6 +3,8 @@ Module providing tools for post-processing configuration files and dataframes
 """
 from collections import defaultdict
 
+from fhir2dataset import timing
+
 CONFIG_MAPPING = {
     "alias": "from:alias",
     "resource_type": "from:resource_type",
@@ -16,6 +18,7 @@ CONFIG_MAPPING = {
 }
 
 
+@timing
 def create_config(df_keep, patients_id):
     from_dict = defaultdict()
     select_dict = defaultdict(list)

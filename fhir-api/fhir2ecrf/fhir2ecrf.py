@@ -4,7 +4,7 @@ import logging
 from pprint import pformat
 from collections import defaultdict
 
-from fhir2dataset import Query, FHIRRules
+from fhir2dataset import Query, FHIRRules, timing
 from fhir2ecrf.export_tools import (
     create_config,
     change_alias,
@@ -88,6 +88,7 @@ class FHIR2eCRF:
         df = fhir2ecrf.query(config_front)
     """  # noqa
 
+    @timing
     def __init__(self, token: str = None, fhir_api_url: str = None):
         """Metadata loading
 
@@ -100,6 +101,7 @@ class FHIR2eCRF:
         self.df_crf_attributes = self._load_crf_attributes()
         self.fhir_rules = FHIRRules(fhir_api_url=self.fhir_api_url)
 
+    @timing
     def query(self, config_front: dict) -> pd.DataFrame:
         """Perform the query on the FHIR Api according to the config_front of the following form:
         {
@@ -157,9 +159,11 @@ class FHIR2eCRF:
         logger.debug(f"Main dataframe after after rearranging the columns\n{df.to_string()}")
         return df
 
+    @timing
     def _load_crf_attributes(self):
         return pd.read_csv(PATH_CRF_ATTRIBUTES)
 
+    @timing
     def _create_config_fhir2dataset(self, config_front):
         df = self.df_crf_attributes
         post_treatement = defaultdict(list)
