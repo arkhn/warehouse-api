@@ -1,8 +1,6 @@
 import logging
 import os
 import re
-import json
-import requests
 
 import elasticsearch
 from flask import Blueprint, request, jsonify
