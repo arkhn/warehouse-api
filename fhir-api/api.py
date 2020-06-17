@@ -35,7 +35,7 @@ CORS(api)
 
 
 @api.route("/<resource_type>/<id>", methods=["GET"])
-# @auth_required
+@auth_required
 def read(resource_type, id):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
