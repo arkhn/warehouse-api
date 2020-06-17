@@ -14,8 +14,8 @@ temperature,,observation_3,Observation,valueQuantity.value,child,subject,patient
 temperature,,patient,Patient,,,,,,,,,
 albumine,,observation_4,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50862,observation_4:valueQuantity.value,first
 albumine,,patient,Patient,,,,,,,,,
-creatinine,,observation_5,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50912,observation_5:valueQuantity.value,first
-creatinine,,patient,Patient,,,,,,,,,
+creatinin,,observation_5,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50912,observation_5:valueQuantity.value,first
+creatinin,,patient,Patient,,,,,,,,,
 glucose,,observation_6,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50809,observation_6:valueQuantity.value,first
 glucose,,patient,Patient,,,,,,,,,
 bilirubin,,observation_7,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,51464,observation_7:valueQuantity.value,first
