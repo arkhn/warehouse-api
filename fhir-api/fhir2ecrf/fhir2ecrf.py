@@ -198,9 +198,17 @@ class FHIR2eCRF:
                 col_name_internal = f"{alias_new}:{select}"
                 df_keep = pd.concat([df_keep, df_temp])
             else:
-                col_name_internal = df_infos[df_infos["officialName"] == official_name][
-                    "internal_column_name"
-                ].iloc[0]
+                try:
+                    col_name_internal = df_infos[df_infos["officialName"] == official_name][
+                        "internal_column_name"
+                    ].iloc[0]
+                except IndexError:
+                    logger.info(f"officialName: {official_name}")
+                    logger.info("df_crf_attributes:")
+                    logger.info(pformat(df))
+                    logger.info("df_infos:")
+                    logger.info(pformat(df_infos))
+                    raise
             post_treatment_type = df_infos[df_infos["officialName"] == official_name][
                 "column_post_treatment"
             ].iloc[0]
