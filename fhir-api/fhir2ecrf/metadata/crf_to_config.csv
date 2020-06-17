@@ -1,9 +1,9 @@
 officialName,type,from:alias,from:resource_type,select:jsonpath,join:how,join:jsonpath,join:alias_child,where:searchparamArkhn,where:prefix,where:value,internal_column_name,column_post_treatment
 id,internal,patient,Patient,id,,,,,,,patient:id,first
-identifier,,patient,Patient,identifier[0].value,,,,,,,patient:identifier[0].value,first
-first name,,patient,Patient,name[0].given[0],,,,,,,patient:name[0].given[0],first
-last name,,patient,Patient,name[0].family,,,,,,,patient:name[0].family,first
-postalcode,,patient,Patient,address[0].postalCode,,,,,,,patient:address[0].postalCode,first
+identifier,,patient,Patient,identifier.value,,,,,,,patient:identifier.value,first
+first name,,patient,Patient,name.given,,,,,,,patient:name.given,first
+last name,,patient,Patient,name.family,,,,,,,patient:name.family,first
+postalcode,,patient,Patient,address.postalCode,,,,,,,patient:address.postalCode,first
 date of birth,,patient,Patient,birthDate,,,,,,,patient:birthDate,first
 gender,,patient,Patient,gender,,,,,,,patient:gender,first
 weight,,observation,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,29463-7,observation:valueQuantity.value,first
@@ -30,13 +30,13 @@ alat,,observation_11,Observation,valueQuantity.value,child,subject,patient,code.
 alat,,patient,Patient,,,,,,,,,
 asat,,observation_12,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50878,observation_12:valueQuantity.value,first
 asat,,patient,Patient,,,,,,,,,
-general diagnostic,,diagnostic,DiagnosticReport,code.coding[0].code,child,subject,patient,extension.valueString,,1,diagnostic:code.coding[0].code,first
+general diagnostic,,diagnostic,DiagnosticReport,code.coding.code,child,subject,patient,extension.valueString,,1,diagnostic:code.coding.code,first
 general diagnostic,,patient,Patient,,,,,,,,,
-specific diagnostic text,text,diagnostic_text,DiagnosticReport,code.coding[0].display,child,subject,patient,code.coding.display:contains,,text,diagnostic_text:code.coding[0].display,bool
+specific diagnostic text,text,diagnostic_text,DiagnosticReport,code.coding.display,child,subject,patient,code.coding.display:contains,,text,diagnostic_text:code.coding.display,bool
 specific diagnostic text,,patient,Patient,,,,,,,,,
-specific diagnostic code,text,diagnostic_code,DiagnosticReport,code.coding[0].code,child,subject,patient,code.coding.code,,text,diagnostic_code:code.coding[0].code,bool
+specific diagnostic code,text,diagnostic_code,DiagnosticReport,code.coding.code,child,subject,patient,code.coding.code,,text,diagnostic_code:code.coding.code,bool
 specific diagnostic code,,patient,Patient,,,,,,,,,
 medication name,text,medication_text,MedicationRequest,medicationCodeableConcept.text,child,subject,patient,medicationCodeableConcept.text:contains,,text,medication_text:medicationCodeableConcept.text,bool
 medication name,,patient,Patient,,,,,,,,,
-medication code,text,medication_code,MedicationRequest,medicationCodeableConcept.coding[0].code,child,subject,patient,medicationCodeableConcept.coding.code,,text,medication_code:medicationCodeableConcept.coding[0].code,bool
+medication code,text,medication_code,MedicationRequest,medicationCodeableConcept.coding.code,child,subject,patient,medicationCodeableConcept.coding.code,,text,medication_code:medicationCodeableConcept.coding.code,bool
 medication code,,patient,Patient,,,,,,,,,
