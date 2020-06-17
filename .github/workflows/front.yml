@@ -48,13 +48,11 @@ jobs:
       - name: Build
         run: |
           cd front/
-          CI=false yarn docker:build
-  
-      - name: Tag docker images
-        run: |
-          docker tag $IMAGE:latest $IMAGE:$GITHUB_SHA
+          yarn build:docker:demo
+          yarn build:docker:staging
 
       - name: Publish to the docker hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
-          docker push $IMAGE:latest
+          docker push $IMAGE:demo
+          docker push $IMAGE:staging
