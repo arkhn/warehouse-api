@@ -1,9 +1,9 @@
 officialName,type,from:alias,from:resource_type,select:jsonpath,join:how,join:jsonpath,join:alias_child,where:searchparamArkhn,where:prefix,where:value,internal_column_name,column_post_treatment
 id,internal,patient,Patient,id,,,,,,,patient:id,first
-identifier,,patient,Patient,identifier[0].value,,,,,,,patient:identifier[0].value,first
-first name,,patient,Patient,name[0].given[0],,,,,,,patient:name[0].given[0],first
-last name,,patient,Patient,name[0].family,,,,,,,patient:name[0].family,first
-postalcode,,patient,Patient,address[0].postalCode,,,,,,,patient:address[0].postalCode,first
+identifier,,patient,Patient,identifier.value,,,,,,,patient:identifier.value,first
+first name,,patient,Patient,name.given,,,,,,,patient:name.given,first
+last name,,patient,Patient,name.family,,,,,,,patient:name.family,first
+postal code,,patient,Patient,address.postalCode,,,,,,,patient:address.postalCode,first
 date of birth,,patient,Patient,birthDate,,,,,,,patient:birthDate,first
 gender,,patient,Patient,gender,,,,,,,patient:gender,first
 weight,,observation,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,29463-7,observation:valueQuantity.value,first
@@ -12,31 +12,31 @@ height,,observation_2,Observation,valueQuantity.value,child,subject,patient,code
 height,,patient,Patient,,,,,,,,,
 temperature,,observation_3,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50825,observation_3:valueQuantity.value,first
 temperature,,patient,Patient,,,,,,,,,
-albumine,,observation_4,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50862,observation_4:valueQuantity.value,first
-albumine,,patient,Patient,,,,,,,,,
-creatinine,,observation_5,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50912,observation_5:valueQuantity.value,first
-creatinine,,patient,Patient,,,,,,,,,
-glucose,,observation_6,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50809,observation_6:valueQuantity.value,first
+albumin,,observation_4,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,1751-7,observation_4:valueQuantity.value,first
+albumin,,patient,Patient,,,,,,,,,
+creatinin,,observation_5,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,2160-0,observation_5:valueQuantity.value,first
+creatinin,,patient,Patient,,,,,,,,,
+glucose,,observation_6,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,2339-0,observation_6:valueQuantity.value,first
 glucose,,patient,Patient,,,,,,,,,
-bilirubin,,observation_7,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,51464,observation_7:valueQuantity.value,first
+bilirubin,,observation_7,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,5770-3,observation_7:valueQuantity.value,first
 bilirubin,,patient,Patient,,,,,,,,,
-magnesium,,observation_8,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50960,observation_8:valueQuantity.value,first
+magnesium,,observation_8,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,2601-3,observation_8:valueQuantity.value,first
 magnesium,,patient,Patient,,,,,,,,,
-sodium,,observation_9,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50983,observation_9:valueQuantity.value,first
+sodium,,observation_9,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,2951-2,observation_9:valueQuantity.value,first
 sodium,,patient,Patient,,,,,,,,,
-potassium,,observation_10,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50971,observation_10:valueQuantity.value,first
+potassium,,observation_10,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,2823-3,observation_10:valueQuantity.value,first
 potassium,,patient,Patient,,,,,,,,,
-alat,,observation_11,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50861,observation_11:valueQuantity.value,first
+alat,,observation_11,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,1742-6,observation_11:valueQuantity.value,first
 alat,,patient,Patient,,,,,,,,,
-asat,,observation_12,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,50878,observation_12:valueQuantity.value,first
+asat,,observation_12,Observation,valueQuantity.value,child,subject,patient,code.coding.code,,1920-8,observation_12:valueQuantity.value,first
 asat,,patient,Patient,,,,,,,,,
-general diagnostic,,diagnostic,DiagnosticReport,code.coding[0].code,child,subject,patient,extension.valueString,,1,diagnostic:code.coding[0].code,first
+general diagnostic,,diagnostic,DiagnosticReport,code.coding.code,child,subject,patient,extension.valueString,,1,diagnostic:code.coding.code,first
 general diagnostic,,patient,Patient,,,,,,,,,
-specific diagnostic text,text,diagnostic_text,DiagnosticReport,code.coding[0].display,child,subject,patient,code.coding.display:contains,,text,diagnostic_text:code.coding[0].display,bool
+specific diagnostic text,text,diagnostic_text,DiagnosticReport,code.coding.display,child,subject,patient,code.coding.display:contains,,text,diagnostic_text:code.coding.display,bool
 specific diagnostic text,,patient,Patient,,,,,,,,,
-specific diagnostic code,text,diagnostic_code,DiagnosticReport,code.coding[0].code,child,subject,patient,code.coding.code,,text,diagnostic_code:code.coding[0].code,bool
+specific diagnostic code,text,diagnostic_code,DiagnosticReport,code.coding.code,child,subject,patient,code.coding.code,,text,diagnostic_code:code.coding.code,bool
 specific diagnostic code,,patient,Patient,,,,,,,,,
 medication name,text,medication_text,MedicationRequest,medicationCodeableConcept.text,child,subject,patient,medicationCodeableConcept.text:contains,,text,medication_text:medicationCodeableConcept.text,bool
 medication name,,patient,Patient,,,,,,,,,
-medication code,text,medication_code,MedicationRequest,medicationCodeableConcept.coding[0].code,child,subject,patient,medicationCodeableConcept.coding.code,,text,medication_code:medicationCodeableConcept.coding[0].code,bool
+medication code,text,medication_code,MedicationRequest,medicationCodeableConcept.coding.code,child,subject,patient,medicationCodeableConcept.coding.code,,text,medication_code:medicationCodeableConcept.coding.code,bool
 medication code,,patient,Patient,,,,,,,,,

@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import math
 
 import elasticsearch
 from flask import Blueprint, request, jsonify
@@ -20,6 +21,8 @@ from fhir2ecrf import FHIR2eCRF
 
 from pysin import search as document_search
 
+logging.basicConfig(level=logging.DEBUG)
+
 FHIR_API_URL = os.getenv("FHIR_API_URL")
 FHIR_API_TOKEN = os.getenv("FHIR_API_TOKEN")
 ARX_HOST = os.getenv("ARX_HOST")
@@ -29,6 +32,8 @@ api = Blueprint("api", __name__)
 # enable Cross-Origin Resource Sharing
 # "Allow-Control-Allow-Origin" HTTP header
 CORS(api)
+
+fhir2ecrf = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
 
 
 @api.route("/<resource_type>/<id>", methods=["GET"])
@@ -88,9 +93,8 @@ def create(resource_type):
 
     # FIXME clean all of this
     if resource_type == "Group" and "$export" in request.args:
-        f = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
         params = request.get_json(force=True)
-        df = f.query(params)
+        df = fhir2ecrf.query(params)
         # try:
         #     df, score = Anonymizer(f"{ARX_HOST}:{ARX_PORT}").anonymize_dataset(df, params)
         # except requests.exceptions.RequestException as e:
@@ -98,6 +102,7 @@ def create(resource_type):
 
         # TODO anonymize dataset
         # return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
+        df = df.replace({math.nan: None})
         return jsonify({"df": df.to_dict(orient="list"), "score": 0})
 
     Model = resources_models[resource_type]
