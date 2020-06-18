@@ -33,6 +33,8 @@ api = Blueprint("api", __name__)
 # "Allow-Control-Allow-Origin" HTTP header
 CORS(api)
 
+fhir2ecrf = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
+
 
 @api.route("/<resource_type>/<id>", methods=["GET"])
 @auth_required
@@ -91,9 +93,8 @@ def create(resource_type):
 
     # FIXME clean all of this
     if resource_type == "Group" and "$export" in request.args:
-        f = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
         params = request.get_json(force=True)
-        df = f.query(params)
+        df = fhir2ecrf.query(params)
         # try:
         #     df, score = Anonymizer(f"{ARX_HOST}:{ARX_PORT}").anonymize_dataset(df, params)
         # except requests.exceptions.RequestException as e:
