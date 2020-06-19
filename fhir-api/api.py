@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import math
+import requests
+import json
 
 import elasticsearch
 from flask import Blueprint, request, jsonify
@@ -17,11 +19,11 @@ from errors import OperationOutcome, AuthenticationError
 from models import resources_models
 from fhir2ecrf import FHIR2eCRF
 
-# from arkhn_arx import Anonymizer
+from arkhn_arx import Anonymizer
 
 from pysin import search as document_search
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 FHIR_API_URL = os.getenv("FHIR_API_URL")
 FHIR_API_TOKEN = os.getenv("FHIR_API_TOKEN")
@@ -34,6 +36,7 @@ api = Blueprint("api", __name__)
 CORS(api)
 
 fhir2ecrf = FHIR2eCRF(FHIR_API_TOKEN, f"{FHIR_API_URL}/")
+anonymizer = Anonymizer(f"{ARX_HOST}:{ARX_PORT}")
 
 
 @api.route("/<resource_type>/<id>", methods=["GET"])
@@ -91,19 +94,16 @@ def create(resource_type):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
-    # FIXME clean all of this
     if resource_type == "Group" and "$export" in request.args:
         params = request.get_json(force=True)
         df = fhir2ecrf.query(params)
-        # try:
-        #     df, score = Anonymizer(f"{ARX_HOST}:{ARX_PORT}").anonymize_dataset(df, params)
-        # except requests.exceptions.RequestException as e:
-        #     return jsonify({"error": json.loads(str(e))})
+        try:
+            df, score = anonymizer.anonymize_dataset(df, params)
+        except requests.exceptions.RequestException as e:
+            return jsonify({"error": json.loads(str(e))}), 400
 
-        # TODO anonymize dataset
-        # return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
-        df = df.replace({math.nan: None})
-        return jsonify({"df": df.to_dict(orient="list"), "score": 0})
+        df = df.replace({math.nan: "None"})
+        return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)

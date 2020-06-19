@@ -11,4 +11,4 @@ uWSGI==2.0.18
 uwsgidecorators==1.1.0
 pandas==1.0.3
 fhir2dataset==0.0.7
-arkhn_arx==0.0.6
+arkhn_arx==0.0.7
