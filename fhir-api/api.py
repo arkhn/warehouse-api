@@ -103,7 +103,7 @@ def create(resource_type):
             return jsonify({"error": json.loads(str(e))}), 400
 
         df = df.replace({math.nan: "None"})
-        return jsonify({"df": df.to_dict(orient="list"), "score": score[0]})
+        return jsonify({"df": df.to_dict(orient="records"), "score": score[0]})
 
     Model = resources_models[resource_type]
     resource_data = request.get_json(force=True)
