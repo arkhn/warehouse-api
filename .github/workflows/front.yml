@@ -45,14 +45,64 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Build
+      - name: Build staging and demo
         run: |
           cd front/
           yarn build:docker:demo
           yarn build:docker:staging
+
+      - name: Build Ambroise
+        env:
+          IP: ${{ secrets.IP_VM_AMB }}
+          STAGE: ambroise
+        run: |
+          cd front/
+          ./scripts/generate_client_env.sh > .env.ambroise
+          docker build -t arkhn/front-api:ambroise --build-arg ENV_FILE=.env.ambroise .
+
+      - name: Build AP
+        env:
+          IP: ${{ secrets.IP_VM_AP }}
+          STAGE: aphp
+        run: |
+          cd front/
+          ./scripts/generate_client_env.sh > .env.aphp
+          docker build -t arkhn/front-api:aphp --build-arg ENV_FILE=.env.aphp .
+
+      - name: Build Clb
+        env:
+          IP: ${{ secrets.IP_VM_CLB }}
+          STAGE: clb
+        run: |
+          cd front/
+          ./scripts/generate_client_env.sh > .env.clb
+          docker build -t arkhn/front-api:clb --build-arg ENV_FILE=.env.clb .
+
+      - name: Build Curie
+        env:
+          IP: ${{ secrets.IP_VM_CURIE }}
+          STAGE: curie
+        run: |
+          cd front/
+          ./scripts/generate_client_env.sh > .env.curie
+          docker build -t arkhn/front-api:curie --build-arg ENV_FILE=.env.curie .
+
+      - name: Build RMS
+        env:
+          IP: ${{ secrets.IP_VM_REIMS }}
+          STAGE: rms
+        run: |
+          cd front/
+          ./scripts/generate_client_env.sh > .env.rms
+          docker build -t arkhn/front-api:rms --build-arg ENV_FILE=.env.rms .
 
       - name: Publish to the docker hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
           docker push $IMAGE:demo
           docker push $IMAGE:staging
+          docker push $IMAGE:ambroise
+          docker push $IMAGE:aphp
+          docker push $IMAGE:clb
+          docker push $IMAGE:curie
+          docker push $IMAGE:rms
