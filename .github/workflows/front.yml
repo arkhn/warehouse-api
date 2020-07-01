@@ -45,11 +45,12 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Build staging and demo
+      - name: Build dev, staging and demo
         run: |
           cd front/
-          yarn build:docker:demo
+          yarn build:docker:dev
           yarn build:docker:staging
+          yarn build:docker:demo
 
       - name: Build Ambroise
         env:
@@ -99,8 +100,9 @@ jobs:
       - name: Publish to the docker hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
-          docker push $IMAGE:demo
+          docker push $IMAGE:dev
           docker push $IMAGE:staging
+          docker push $IMAGE:demo
           docker push $IMAGE:ambroise
           docker push $IMAGE:aphp
           docker push $IMAGE:clb
