@@ -18,13 +18,8 @@ export interface IReduxStore {
 }
 
 export interface ParameterValue {
-  parameter: SearchParameter;
+  parameter: string;
   value: string;
-}
-
-export interface SearchParameter {
-  name: string;
-  expression: string;
 }
 
 export interface DocumentLink {

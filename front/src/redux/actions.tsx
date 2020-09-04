@@ -1,8 +1,8 @@
-import { IAction, SearchParameter } from '../types';
+import { IAction } from '../types';
 
 export const updateParameter = (
   index: number,
-  parameter: SearchParameter | null,
+  parameter: string | null,
   value: string
 ): IAction => {
   return {

@@ -1,7 +1,7 @@
 import { ISimpleAction } from '../types';
 
 const initialState: any = [
-  { parameter: { name: '', expression: '' }, value: '' },
+  { parameter: '', value: '' },
 ];
 
 export const searchParametersReducer = (
@@ -11,7 +11,7 @@ export const searchParametersReducer = (
   switch (action.type) {
     case 'UPDATE_PARAMETER': {
       state[action.payload.index] = {
-        parameter: action.payload.parameter || { name: '', expression: '' },
+        parameter: action.payload.parameter || '',
         value: action.payload.value,
       };
       return [...state];
@@ -20,7 +20,7 @@ export const searchParametersReducer = (
     case 'ADD_PARAMETER': {
       state = [
         ...state,
-        { parameter: { name: '', expression: '' }, value: '' },
+        { parameter: '', value: '' },
       ];
       return [...state];
     }
@@ -28,7 +28,7 @@ export const searchParametersReducer = (
     case 'DELETE_PARAMETER': {
       state.splice(action.payload.index, 1);
       if (state.length === 0) {
-        state = [{ parameter: { name: '', expression: '' }, value: '' }];
+        state = [{ parameter: '', value: '' }];
       }
       return [...state];
     }

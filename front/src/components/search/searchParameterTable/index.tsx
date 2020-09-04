@@ -12,7 +12,7 @@ import TableRow from '@material-ui/core/TableRow';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { IReduxStore, SearchParameter } from '../../../types';
+import { IReduxStore } from '../../../types';
 import {
   addParameter,
   deleteParameter,
@@ -21,20 +21,12 @@ import {
 
 import * as bundleSearchParameters from '../../../fhir/search-parameters.json';
 
-const parametersPerType = new Map<string, SearchParameter[]>();
-
-bundleSearchParameters.entry.forEach((entry) => {
-  const resource = entry.resource;
-  if (resource.type === 'string' && resource.expression) {
-    const keys = resource.base || ['__common__'];
-    keys.forEach((key) =>
-      parametersPerType.set(key, [
-        ...(parametersPerType.get(key) || []),
-        { name: resource.name, expression: resource.expression },
-      ])
-    );
-  }
-});
+const parametersPerType = bundleSearchParameters.entry.reduce((acc: {[k: string]: string[]}, entry) => {
+  entry.resource.base.forEach((key: string) => {
+    acc[key] = [...(acc[key] || []), entry.resource.name];
+  });
+  return acc;
+}, {});
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -76,7 +68,7 @@ const RenderRow = ({ index, type }: any) => {
       </TableCell>
       <TableCell align="right" className={classes.row}>
         <Autocomplete
-          options={parametersPerType.get(type) || []}
+          options={parametersPerType[type] || []}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -84,10 +76,9 @@ const RenderRow = ({ index, type }: any) => {
               variant="outlined"
             />
           )}
-          getOptionLabel={(option) => option.name}
-          getOptionSelected={(option, value) => option.name === value.name}
+          getOptionSelected={(option, value) => option === value}
           value={searchParameters[index].parameter}
-          onChange={(_: any, newValue: SearchParameter | null) => {
+          onChange={(_: any, newValue: string | null) => {
             dispatch(
               updateParameter(index, newValue, searchParameters[index].value)
             );
@@ -131,7 +122,7 @@ const SearchParameterTable = ({ type }: any) => {
         key="table"
       >
         <TableBody key="tableBody">
-          {Array.from(Array(searchParameters.length).keys()).map((index) => (
+          {searchParameters.map((_, index) => (
             <RenderRow
               key={index}
               index={index}
