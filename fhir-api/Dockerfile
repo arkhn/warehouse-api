@@ -1,23 +1,31 @@
 FROM python:3.8-slim
 
-RUN apt-get update \
-    && apt-get -y install build-essential libpoppler-cpp-dev pkg-config bash git
-
-RUN groupadd api_group
-RUN useradd -G api_group api_user
-
-WORKDIR /srv/flask_app
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONPATH "${PYTHONPATH}:/srv/flask_app"
 
-COPY requirements.txt  /srv/flask_app/requirements.txt
-RUN pip3 install -r requirements.txt --src /usr/local/src
+RUN groupadd api_group && useradd --no-log-init -G api_group api_user
 
-COPY . /srv/flask_app
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get -y install build-essential libpoppler-cpp-dev pkg-config bash git \
+    && apt-get autoremove --purge -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /srv/flask_app
+
+COPY requirements.txt  /srv/flask_app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt --src /usr/local/src
+
+COPY . .
 
 RUN chmod +x ./start.sh
-
 RUN chown -R api_user:api_group /usr/local/lib
 
 USER api_user
 
-CMD ["./start.sh"]
+EXPOSE 2000
+
+ENTRYPOINT ["./start.sh"]
