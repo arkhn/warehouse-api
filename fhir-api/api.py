@@ -3,7 +3,7 @@ import logging
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 
-from fhir.resource.operationoutcome import OperationOutcome
+from fhir.resources.operationoutcome import OperationOutcome
 
 from authentication import auth_required
 from db import get_store
