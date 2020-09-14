@@ -7,6 +7,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "start:demo": "env $(cat .env.demo) react-scripts start",
+    "start:dev": "env $(cat .env.dev) react-scripts start",
     "start:staging": "env $(cat .env.staging) react-scripts start",
     "build:docker:demo": "docker build -t arkhn/front-api:demo --build-arg ENV_FILE=.env.demo .",
     "build:docker:dev": "docker build -t arkhn/front-api:dev --build-arg ENV_FILE=.env.dev .",

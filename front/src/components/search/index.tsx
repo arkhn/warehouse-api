@@ -96,21 +96,15 @@ const Search = (): React.ReactElement => {
       responseBundle = response.data;
     } catch (err) {
       const errMessage = err.response ? err.response.data : err.message;
-      setApiErrors((apiErrors) => [...apiErrors, errMessage]);
+      setApiErrors([errMessage]);
     }
 
     if (responseBundle.issue) {
-      setApiErrors((apiErrors) => [
-        ...apiErrors,
-        responseBundle.issue.diagnostic,
-      ]);
+      setApiErrors(responseBundle.issue.map((i: any) => i.diagnostics));
     } else {
       responseBundle.entry.forEach((entry: any) => {
         if (entry.resource.issue) {
-          setApiErrors((apiErrors) => [
-            ...apiErrors,
-            entry.resource.issue.details,
-          ]);
+          setApiErrors(entry.resource.issue.map((i: any) => i.details));
         }
       });
       responseBundle.entry = responseBundle.entry.filter(
