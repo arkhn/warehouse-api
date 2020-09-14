@@ -21,12 +21,15 @@ import {
 
 import * as bundleSearchParameters from '../../../fhir/search-parameters.json';
 
-const parametersPerType = bundleSearchParameters.entry.reduce((acc: {[k: string]: string[]}, entry) => {
-  entry.resource.base.forEach((key: string) => {
-    acc[key] = [...(acc[key] || []), entry.resource.name];
-  });
-  return acc;
-}, {});
+const parametersPerType = bundleSearchParameters.entry.reduce(
+  (acc: { [k: string]: string[] }, entry) => {
+    entry.resource.base.forEach((key: string) => {
+      acc[key] = [...(acc[key] || []), entry.resource.name];
+    });
+    return acc;
+  },
+  {}
+);
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

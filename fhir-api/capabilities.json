@@ -1,0 +1,179 @@
+{
+  "resourceType": "CapabilityStatement",
+  "id": "arkhn-capabilities",
+  "text": {},
+  "url": "https://demo.arkhn.com/metadata",
+  "version": "20200710",
+  "name": "ARKHN-EHR",
+  "title": "Arkhn EHR capability statement",
+  "status": "draft",
+  "experimental": true,
+  "date": "2012-01-04",
+  "publisher": "Arkhn",
+  "contact": [
+    {
+      "name": "Arkhn technical dream team",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "engineering@arkhn.com"
+        }
+      ]
+    }
+  ],
+  "description": "This is the FHIR capability statement for the main data warehouse at Arkhn",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/variant-state",
+            "code": "positive"
+          }
+        ]
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "FR",
+          "display": "France"
+        }
+      ]
+    }
+  ],
+  "purpose": "Main FHIR API capability statement, published for contracting and operational support",
+  "copyright": "Copyright © Arkhn",
+  "kind": "instance",
+  "instantiates": [""],
+  "software": {
+    "name": "fhir-api",
+    "version": "0.1",
+    "releaseDate": "2020-07-10"
+  },
+  "implementation": {
+    "description": "main data warehouse at Arkhn",
+    "url": "https://demo.arkhn.com/api"
+  },
+  "fhirVersion": "4.0.1",
+  "format": ["json"],
+  "patchFormat": ["application/json-patch+json"],
+  "implementationGuide": ["http://none.yet"],
+  "rest": [
+    {
+      "mode": "server",
+      "documentation": "Main FHIR endpoint for arkhn",
+      "security": {
+        "cors": true,
+        "service": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/restful-security-service",
+                "code": "SMART-on-FHIR"
+              }
+            ]
+          }
+        ],
+        "description": "See Smart on FHIR documentation"
+      },
+      "resource": [
+        {
+          "type": "Patient",
+          "profile": "http://registry.fhir.org/r4/StructureDefinition/7896271d-57f6-4231-89dc-dcc91eab2416",
+          "supportedProfile": [
+            "http://registry.fhir.org/r4/StructureDefinition/00ab9e7a-06c7-4f77-9234-4154ca1e3347"
+          ],
+          "documentation": "This server does not let the clients create identities.",
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread",
+              "documentation": "Only supported for patient records since 12-Dec 2012"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "history-type"
+            }
+          ],
+          "versioning": "versioned-update",
+          "readHistory": true,
+          "updateCreate": false,
+          "conditionalCreate": true,
+          "conditionalRead": "full-support",
+          "conditionalUpdate": false,
+          "conditionalDelete": "not-supported",
+          "searchInclude": ["Organization"],
+          "searchRevInclude": ["Person"],
+          "searchParam": [
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-identifier",
+              "type": "token",
+              "documentation": "Only supports search by institution MRN"
+            },
+            {
+              "name": "general-practitioner",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-general-practitioner",
+              "type": "reference"
+            }
+          ]
+        }
+      ],
+      "interaction": [
+        {
+          "code": "transaction"
+        },
+        {
+          "code": "history-system"
+        }
+      ],
+      "compartment": ["http://hl7.org/fhir/CompartmentDefinition/patient"]
+    }
+  ],
+  "messaging": [
+    {
+      "endpoint": [
+        {
+          "protocol": {
+            "system": "http://terminology.hl7.org/CodeSystem/message-transport",
+            "code": "mllp"
+          },
+          "address": "mllp:10.1.1.10:9234"
+        }
+      ],
+      "reliableCache": 30,
+      "documentation": "ADT A08 equivalent for external system notifications",
+      "supportedMessage": [
+        {
+          "mode": "receiver",
+          "definition": "MessageDefinition/example"
+        }
+      ]
+    }
+  ],
+  "document": [
+    {
+      "mode": "consumer",
+      "documentation": "Basic rules for all documents in the EHR system",
+      "profile": "http://fhir.hl7.org/base/Profilebc054d23-75e1-4dc6-aca5-838b6b1ac81d/_history/b5fdd9fc-b021-4ea1-911a-721a60663796"
+    }
+  ]
+}

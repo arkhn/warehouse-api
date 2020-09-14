@@ -1,6 +1,5 @@
 from bson import ObjectId
 from flask import Flask, json
-import os
 
 from api import api
 import db
@@ -16,9 +15,6 @@ class JSONEncoder(json.JSONEncoder):
 
 def create_app():
     # Check for environment variables
-    if "JWT_PUBLIC_KEY" not in os.environ:
-        raise EnvironmentError("JWT_PUBLIC_KEY env variable doesn't exist.")
-
     app = Flask(__name__)
     app.register_blueprint(api)
     app.json_encoder = JSONEncoder

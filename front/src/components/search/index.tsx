@@ -78,7 +78,7 @@ const Search = (): React.ReactElement => {
   useEffect(() => {
     const searchUrl = searchParameters
       .filter((param) => param.parameter && param.value)
-      .map((param) => `${param.parameter}=${param.value}`)
+      .map((param) => `${param.parameter}=${param.value}`);
     setfFhirUrl(
       `${FHIR_API_URL}${selectedCollection ? '/' + selectedCollection : ''}${
         searchUrl.length > 0 ? '?' + searchUrl.join('&') : ''

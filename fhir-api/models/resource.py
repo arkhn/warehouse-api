@@ -1,95 +1,114 @@
+from typing import Union, Dict
+
 import uuid
 from flask import jsonify
+import fhirstore
+from fhir.resources import FHIRAbstractModel
+from fhir.resources.operationoutcome import OperationOutcome
+from fhir.resources.bundle import Bundle
 
-from pymongo.errors import DuplicateKeyError
-
-from errors.operation_outcome import OperationOutcome
+from errors import BadRequest
 from db import get_store
 
 
 class Resource:
-    resource = None
+    resource: Union[None, FHIRAbstractModel] = None
 
-    def __init__(self, id=None, resource=None):
+    def __init__(self, id=None, resource: Union[None, Dict, FHIRAbstractModel] = None):
         """Initializes a Resource resource instance.
         The ID must be provided if the resource already exists.
         """
         if not resource and not id:
-            raise OperationOutcome("An id or a resource must be provided")
+            raise BadRequest("An id or a resource must be provided")
+
         self.db = get_store()
-        self.id = id or resource.get("id")
-        self.resource = resource
         self.resource_type = type(self).__name__
 
-    def json(self):
+        if resource:
+            self.resource = self.db.normalize_resource(resource)
+            self.id = self.resource.id
+        else:
+            self.id = id
+
+    def json(self) -> str:
         """Returns the JSON serialization of the Resource resource"""
         if self.resource:
-            return jsonify(self.resource)
+            return jsonify(self.resource.dict())
         return jsonify({"id": self.id})
 
-    def create(self):
+    def create(self) -> Union[FHIRAbstractModel, OperationOutcome]:
         """Creates a Resource instance in fhirstore."""
         if not self.resource:
-            raise OperationOutcome("Missing resource data to create a Resource")
+            raise BadRequest("Missing resource data to create a resource")
 
+        # generate a uuid for the resource if it doesn't have one already
         self.id = self.id or str(uuid.uuid4())
+        if not self.resource.id:
+            self.resource.id = self.id
 
-        try:
-            self.resource = self.db.create(
-                {**self.resource, "resourceType": self.resource_type, "id": self.id}
-            )
-        except DuplicateKeyError:
-            raise OperationOutcome(f"Resource {self.id} already exists")
+        res = self.db.create(self.resource)
+        if not isinstance(res, OperationOutcome):
+            self.resource = res
+        return res
 
-        return self
-
-    def read(self):
+    def read(self) -> Union[FHIRAbstractModel, OperationOutcome]:
         """Returns a Resource instance filled with the fhirstore data."""
         if not self.id:
-            raise OperationOutcome("Resource ID is required")
+            raise BadRequest("Resource ID is required")
 
-        self.resource = self.db.read(self.resource_type, self.id)
-        return self
+        res = self.db.read(self.resource_type, self.id)
+        if not isinstance(res, OperationOutcome):
+            self.resource = res
+        return res
 
-    def update(self, resource):
+    def update(self, resource) -> Union[FHIRAbstractModel, OperationOutcome]:
         """Updates a Resource instance in fhirstore.
         If provided, resource.id must match self.id"""
         if not resource:
-            raise OperationOutcome("Resource data is required to update a resource")
+            raise BadRequest("Resource data is required to update a resource")
         if not self.id:
-            raise OperationOutcome("Resource ID is required")
+            raise BadRequest("Resource ID is required")
         if resource.get("id") and resource.get("id") != self.id:
-            raise OperationOutcome("Resource id and update payload do not match")
+            raise BadRequest("Resource id and update payload do not match")
 
-        self.db.update(self.resource_type, self.id, resource)
-        return self
+        res = self.db.update(self.id, resource)
+        if not isinstance(res, OperationOutcome):
+            self.resource = res
+        return res
 
-    def patch(self, patch):
+    def patch(self, patch) -> Union[FHIRAbstractModel, OperationOutcome]:
         """Performs a patch operation on a Resource instance in fhirstore.
         If provided, patch.id must match self.id"""
         if not patch:
-            raise OperationOutcome("Patch data is required to patch a resource")
+            raise BadRequest("Patch data is required to patch a resource")
         if not self.id:
-            raise OperationOutcome("Resource ID is required to patch a resource")
+            raise BadRequest("Resource ID is required to patch a resource")
         if patch.get("id") is not None and patch.get("id") != self.id:
-            raise OperationOutcome("Resource id and patch payload do not match")
+            raise BadRequest("Resource id and patch payload do not match")
 
-        self.db.patch(self.resource_type, self.id, patch)
-        return self
+        res = self.db.patch(self.resource_type, self.id, patch)
+        if not isinstance(res, OperationOutcome):
+            self.resource = res
+        return res
 
-    def delete(self):
+    def delete(self) -> OperationOutcome:
         if not self.id:
-            raise OperationOutcome("Resource ID is required to delete it")
+            raise BadRequest("Resource ID is required to delete it")
 
-        self.resource = self.db.delete(self.resource_type, self.id)
+        try:
+            # res is always a OperationOutcome resource, return it as is.
+            res = self.db.delete(self.resource_type, self.id)
+        except fhirstore.BadRequestError as e:
+            raise BadRequest(str(e))
+
+        self.resource = None
         self.id = None
-        return self
+        return res
 
-    def search(self, args):
+    def search(self, query_string=None, params=None) -> Union[Bundle, OperationOutcome]:
         """Searchs a resource by calling fhirstore search function
         """
-        results = self.db.comprehensive_search(self.resource_type, args)
-        return results
+        return self.db.search(self.resource_type, query_string=query_string, params=params)
 
     def history(self):
         pass

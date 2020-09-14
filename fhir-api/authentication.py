@@ -5,7 +5,11 @@ import os
 
 from errors import AuthenticationError
 
-JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY").replace("\\n", "\n")
+AUTH_DISABLED = True if os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"] else False
+JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "").replace("\\n", "\n")
+
+if not AUTH_DISABLED and not JWT_PUBLIC_KEY:
+    raise Exception("missing JWT_PUBLIC_KEY")
 
 
 def auth_required(f):
@@ -25,4 +29,4 @@ def auth_required(f):
 
         return f(*args, **kwargs)
 
-    return decorated_function
+    return f if AUTH_DISABLED else decorated_function
