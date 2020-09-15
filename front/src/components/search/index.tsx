@@ -1,4 +1,5 @@
 import TextField from '@material-ui/core/TextField';
+import clsx from 'clsx';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -8,15 +9,17 @@ import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
+import HistoryIcon from '@material-ui/icons/History';
 
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import AppBar from '../appBar';
 import SwitchViews from '../switchViews';
 import FhirObject from './fhirObject';
 import SearchParameterTable from './searchParameterTable';
+import { newQuery } from '../../redux/actions';
 
 import { FHIR_API_URL } from '../../constants';
 import { IReduxStore } from '../../types';
@@ -44,14 +47,22 @@ const useStyles = makeStyles((theme: Theme) =>
     searchButton: {
       float: 'right',
     },
+    searchBarDropdown: {
+      listStyle: 'none',
+      margin: 0,
+      padding: '8px 0',
+      overflow: 'auto',
+      maxHeight: '11rem',
+    },
   })
 );
 
 const Search = (): React.ReactElement => {
   const classes = useStyles();
 
-  const searchParameters = useSelector(
-    (state: IReduxStore) => state.searchParameters
+  const dispatch = useDispatch();
+  const { searchParameters, searchHistory } = useSelector(
+    (state: IReduxStore) => state
   );
 
   const [fhirCollections, setFhirCollections] = useState([]);
@@ -87,6 +98,7 @@ const Search = (): React.ReactElement => {
   }, [selectedCollection, searchParameters]);
 
   const executeFhirQuery = async () => {
+    dispatch(newQuery(fhirUrl));
     setApiErrors([]);
     setFhirBundle([]);
     setIsLoading(true);
@@ -97,6 +109,8 @@ const Search = (): React.ReactElement => {
     } catch (err) {
       const errMessage = err.response ? err.response.data : err.message;
       setApiErrors([errMessage]);
+      setIsLoading(false);
+      return;
     }
 
     if (responseBundle.issue) {
@@ -144,11 +158,20 @@ const Search = (): React.ReactElement => {
           />
           <SearchParameterTable type={selectedCollection} />
           <Paper component="form" elevation={0} className={classes.paperForm}>
-            <TextField
-              value={fhirUrl}
+            <Autocomplete
+              options={searchHistory}
+              size="small"
+              freeSolo={true}
               fullWidth={true}
-              onChange={(event: any) => {
-                setfFhirUrl(event.target.value);
+              renderInput={(params) => <TextField {...params} />}
+              forcePopupIcon={true}
+              popupIcon={<HistoryIcon />}
+              value={fhirUrl}
+              onChange={(_: any, value: string | null) =>
+                value && setfFhirUrl(value)
+              }
+              ListboxProps={{
+                className: classes.searchBarDropdown,
               }}
               onKeyPress={(ev) => {
                 if (ev.key === 'Enter') {
@@ -165,14 +188,6 @@ const Search = (): React.ReactElement => {
               <SearchIcon />
             </IconButton>
           </Paper>
-          {/* <Button
-            className={classes.searchButton}
-            aria-label="search"
-            variant="contained"
-            onClick={executeFhirQuery}
-          >
-            <SearchIcon />
-          </Button> */}
           {apiErrors.length > 0 &&
             apiErrors.map((apiError) => (
               <Alert severity="error" className={classes.alertError}>

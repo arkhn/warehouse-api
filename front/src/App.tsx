@@ -6,10 +6,16 @@ import { ApolloLink } from 'apollo-link';
 import { onError } from 'apollo-link-error';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import { PersistGate } from 'redux-persist/integration/react';
 import { createLogger } from 'redux-logger';
 
 import Routes from './routes';
-import searchParametersReducer from './redux/reducers';
+import {
+  searchParametersReducer,
+  searchHistoryReducer,
+} from './redux/reducers';
 
 import { AUTH_API_URL, TOKEN_STORAGE_KEY } from './constants';
 
@@ -84,11 +90,18 @@ const finalCreateStore = applyMiddleware(...middlewares)(createStore);
 
 const mainReducer = combineReducers({
   searchParameters: searchParametersReducer,
+  searchHistory: searchHistoryReducer,
 });
 
-const configureStore = () => {
-  return finalCreateStore(mainReducer);
+const persistConfig = {
+  key: 'root',
+  storage,
 };
+const persistedReducer = persistReducer(persistConfig, mainReducer);
+
+const store = finalCreateStore(persistedReducer);
+
+export const persistor = persistStore(store);
 
 // Client
 export const client = new ApolloClient({
@@ -98,9 +111,11 @@ export const client = new ApolloClient({
 });
 
 export default () => (
-  <Provider store={configureStore()}>
-    <ApolloProvider client={client}>
-      <Routes />
-    </ApolloProvider>
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <ApolloProvider client={client}>
+        <Routes />
+      </ApolloProvider>
+    </PersistGate>
   </Provider>
 );

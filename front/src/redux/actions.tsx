@@ -29,3 +29,8 @@ export const deleteParameter = (index: number): IAction => {
     },
   };
 };
+
+export const newQuery = (url: string): IAction => ({
+  type: 'NEW_QUERY',
+  payload: url,
+});

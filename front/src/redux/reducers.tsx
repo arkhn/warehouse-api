@@ -1,11 +1,10 @@
 import { ISimpleAction } from '../types';
+import { HISTORY_SEARCH_SIZE } from '../constants';
 
-const initialState: any = [
-  { parameter: '', value: '' },
-];
+const searchParametersInitialState: any = [{ parameter: '', value: '' }];
 
 export const searchParametersReducer = (
-  state = initialState,
+  state = searchParametersInitialState,
   action: ISimpleAction
 ): any => {
   switch (action.type) {
@@ -18,10 +17,7 @@ export const searchParametersReducer = (
     }
 
     case 'ADD_PARAMETER': {
-      state = [
-        ...state,
-        { parameter: '', value: '' },
-      ];
+      state = [...state, { parameter: '', value: '' }];
       return [...state];
     }
 
@@ -38,4 +34,26 @@ export const searchParametersReducer = (
   }
 };
 
-export default searchParametersReducer;
+const searchHistoryInitialState: any = [];
+
+export const searchHistoryReducer = (
+  state = searchHistoryInitialState,
+  action: ISimpleAction
+): any => {
+  switch (action.type) {
+    case 'NEW_QUERY': {
+      // if the history the empty, return the first search
+      if (state.length === 0) return [action.payload];
+
+      // if the search is the same as the previous one, do not update the state
+      const [lastQuery] = state;
+      if (lastQuery === action.payload) return state;
+
+      // otherwise, insert the last search on top of the history queue
+      return [action.payload, ...state].slice(0, HISTORY_SEARCH_SIZE);
+    }
+
+    default:
+      return state;
+  }
+};

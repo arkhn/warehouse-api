@@ -15,6 +15,7 @@ export type IAction = ISimpleAction | IThunkAction | Promise<any>;
 
 export interface IReduxStore {
   searchParameters: ParameterValue[];
+  searchHistory: string[];
 }
 
 export interface ParameterValue {
