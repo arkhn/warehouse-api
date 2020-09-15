@@ -7,13 +7,13 @@ connection = None
 connection_es = None
 store = None
 
-DB_NAME = os.getenv("DB_NAME", "fhirstore")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "27017")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("MONGO_DB", "fhirstore")
+DB_HOST = os.getenv("MONGO_HOST", "localhost")
+DB_PORT = os.getenv("MONGO_PORT", "27017")
+DB_USER = os.getenv("MONGO_USER")
+DB_PASSWORD = os.getenv("MONGO_PASSWORD")
 
-ES_URL = os.getenv("ES_URL", "http://localhost:9200")
+ES_URL = os.getenv("ELASTIC_URL", "http://localhost:9200")
 
 
 def reset_db_connection():

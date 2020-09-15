@@ -89,3 +89,8 @@ include/
 
 # node_modules
 **/node_modules/
+
+# Misc
+# TODO(vmttn): uncomment next line
+# *.env
+!.template.env
