@@ -2,7 +2,7 @@ FROM python:3.8-slim
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONPATH "${PYTHONPATH}:/srv/flask_app"
+ENV PYTHONPATH "${PYTHONPATH}:/srv"
 
 RUN groupadd api_group && useradd --no-log-init -G api_group api_user
 
@@ -13,9 +13,9 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /srv/flask_app
+WORKDIR /srv
 
-COPY requirements.txt  /srv/flask_app/requirements.txt
+COPY requirements.txt  /srv/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt --src /usr/local/src
 
@@ -28,4 +28,4 @@ USER api_user
 
 EXPOSE 2000
 
-ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["/srv/docker-entrypoint.sh"]
