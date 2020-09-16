@@ -19,9 +19,9 @@ RUN apt-get update \
 
 RUN python -m venv ${VIRTUAL_ENV}
 
-COPY requirements.txt  .
+COPY requirements  requirements
 RUN pip install --no-cache-dir --upgrade pip uwsgi
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements/base.txt
 
 ########
 # This image is the runtime
