@@ -4,6 +4,3 @@
 **/venv/
 **/build/
 **/dist/
-
-# Misc
-**/Dockerfile

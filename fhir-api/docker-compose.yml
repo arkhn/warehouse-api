@@ -10,7 +10,7 @@ version: "3.7"
 services:
   api:
     image: fhir-api
-    build: fhir-api
+    build: .
     restart: always
     depends_on:
       - elasticsearch
