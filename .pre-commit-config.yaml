@@ -14,3 +14,8 @@ repos:
       - id: isort
         args: [--settings-path=.isort.cfg]
         exclude: ^.*/migrations/.*.py$
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.3
+    hooks:
+      - id: flake8
+        args: [--config=.flake8]
