@@ -92,5 +92,5 @@ include/
 
 # Misc
 # TODO(vmttn): uncomment next line
-# *.env
+*.env
 !.template.env
