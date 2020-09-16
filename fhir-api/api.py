@@ -1,4 +1,5 @@
 import logging
+from multidict import MultiDict
 
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
@@ -98,7 +99,9 @@ def delete(resource_type, id):
 @api.route("/<resource_type>", methods=["GET"])
 @auth_required
 def search(resource_type=None):
-    return get_store().search(resource_type, params=request.args).json()
+    # transform werkzeug.datastructures.ImmutableMultiDict to MultiDict
+    params = MultiDict(request.args.items(multi=True))
+    return get_store().search(resource_type, params=params).json()
 
 
 @api.route("/list-collections", methods=["GET"])
