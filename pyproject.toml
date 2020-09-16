@@ -1,5 +1,6 @@
 [tool.black]
 line-length = 100
+target-version = ['py38']
 exclude = '''
 (
     \.git
@@ -10,6 +11,5 @@ exclude = '''
     | build
     | dist
     | venv\/
-    | test_serde_full\.py
 )
 '''
