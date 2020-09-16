@@ -1,6 +1,7 @@
-from .resource import Resource
-from models import resources
 import db
+from models import resources
+
+from .resource import Resource
 
 resources_models = {}
 

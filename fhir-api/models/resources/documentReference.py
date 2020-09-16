@@ -1,12 +1,12 @@
 import os
 import re
+
 from flask import jsonify
-
 from pysin import search as document_search
-from fhirstore.search import Bundle
 
-from models.resource import Resource
 from db import get_store
+from fhirstore.search import Bundle
+from models.resource import Resource
 
 
 class DocumentReference(Resource):

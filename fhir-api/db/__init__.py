@@ -1,7 +1,9 @@
 import os
-import pymongo
-import fhirstore
+
 import elasticsearch
+import pymongo
+
+import fhirstore
 
 connection = None
 connection_es = None

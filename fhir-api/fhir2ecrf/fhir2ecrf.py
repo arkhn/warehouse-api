@@ -1,15 +1,16 @@
-import pandas as pd
-import os
 import logging
-from pprint import pformat
+import os
 from collections import defaultdict
+from pprint import pformat
 
-from fhir2dataset import Query, FHIRRules, timing
+import pandas as pd
+
+from fhir2dataset import FHIRRules, Query, timing
 from fhir2ecrf.export_tools import (
-    create_config,
     change_alias,
-    treatment_first,
+    create_config,
     treatment_bool,
+    treatment_first,
     treatment_list,
 )
 

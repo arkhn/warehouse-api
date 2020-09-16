@@ -1,7 +1,8 @@
-from flask import request
-from functools import wraps
-import jwt
 import os
+from functools import wraps
+
+import jwt
+from flask import request
 
 from errors import AuthenticationError
 

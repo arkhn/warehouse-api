@@ -1,10 +1,10 @@
-import pytest
 from unittest.mock import patch
 
+import pytest
 from fhir.resources.patient import Patient
 
-from models.resource import Resource
 from errors import BadRequest
+from models.resource import Resource
 
 
 @patch("models.resource.get_store", autospec=True)

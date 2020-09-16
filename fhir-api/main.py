@@ -1,9 +1,9 @@
 from bson import ObjectId
 from flask import Flask, json
 
-from api import api
 import db
 import models
+from api import api
 
 
 class JSONEncoder(json.JSONEncoder):

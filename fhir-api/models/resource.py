@@ -1,14 +1,14 @@
-from typing import Union, Dict
-
 import uuid
-from flask import jsonify
-import fhirstore
-from fhir.resources import FHIRAbstractModel
-from fhir.resources.operationoutcome import OperationOutcome
-from fhir.resources.bundle import Bundle
+from typing import Dict, Union
 
-from errors import BadRequest
+from fhir.resources import FHIRAbstractModel
+from fhir.resources.bundle import Bundle
+from fhir.resources.operationoutcome import OperationOutcome
+from flask import jsonify
+
+import fhirstore
 from db import get_store
+from errors import BadRequest
 
 
 class Resource:
