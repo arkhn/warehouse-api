@@ -66,17 +66,6 @@ def create(resource_type):
     if resource_type not in resources_models:
         raise OperationOutcome(f"Unknown resource type: {resource_type}")
 
-    # if resource_type == "Group" and "$export" in request.args:
-    #     params = request.get_json(force=True)
-    #     df = fhir2ecrf.query(params)
-    #     try:
-    #         df, score = anonymizer.anonymize_dataset(df, params)
-    #     except requests.exceptions.RequestException as e:
-    #         return jsonify({"error": json.loads(str(e))}), 400
-
-    #     df = df.replace({math.nan: "None"})
-    #     return jsonify({"df": df.to_dict(orient="records"), "score": score[0]})
-
     resource_data = request.get_json(force=True)
 
     model = resources_models[resource_type](resource=resource_data)

@@ -221,10 +221,10 @@ class FHIR2eCRF:
                 columns_renaming[col_name_internal] = col_name_export
 
         config = create_config(df_keep, patients_id)
-        logger.info(f"config created:")
+        logger.info("config created:")
         logger.info(pformat(config))
-        logger.debug(f"columns renaming")
+        logger.debug("columns renaming")
         logger.debug(pformat(columns_renaming))
-        logger.debug(f"post-treaments to be performed")
+        logger.debug("post-treaments to be performed")
         logger.debug(pformat(post_treatement))
         return post_treatement, columns_renaming, config

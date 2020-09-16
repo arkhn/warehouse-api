@@ -44,7 +44,11 @@ class TestResource:
 
     @patch("uuid.uuid4", return_value="uuid")
     def test_create(self, mock_uuid, mock_get_store):
-        """Calls the create method of the fhirstore client and registers the ID"""
+        """Test create method.
+
+        Calls the create method of the fhirstore client
+        and registers the ID
+        """
         resource = Patient(gender="male")
         mock_get_store.return_value.normalize_resource.return_value = resource
 
@@ -78,7 +82,11 @@ class TestResource:
         assert r.resource == resource
 
     def test_read(self, mock_get_store):
-        """Calls the read method of the fhirstore client and registers the resource"""
+        """Test read method.
+
+        Calls the read method of the fhirstore client
+        and registers the resource.
+        """
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.read.return_value = resource
@@ -100,7 +108,11 @@ class TestResource:
         assert mock_get_store.return_value.read.call_count == 0
 
     def test_update_without_id(self, mock_get_store):
-        """Calls the update method of the fhirstore client and creates the resource"""
+        """Test update without id.
+
+        Calls the update method of the fhirstore client
+        and creates the resource.
+        """
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.update.return_value = Patient(id="test", gender="other")
@@ -113,7 +125,11 @@ class TestResource:
         assert r.resource == Patient(id="test", gender="other")
 
     def test_update_with_id(self, mock_get_store):
-        """Calls the update method of the fhirstore client and registers the resource"""
+        """Test update with id.
+
+        Calls the update method of the fhirstore client
+        and registers the resource
+        """
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.update.return_value = Patient(id="test", gender="other")
