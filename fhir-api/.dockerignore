@@ -1,4 +1,9 @@
+# Python
+**/*.py[cod]
+**/__pycache__/
 **/venv/
 **/build/
 **/dist/
-**/__pycache__/
+
+# Misc
+**/Dockerfile
