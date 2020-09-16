@@ -52,7 +52,11 @@ def create_config(df_keep, patients_id):
         )
 
         join_dict = update_join_data_line(
-            join_dict, infos["how"], infos["alias"], infos["alias_child"], infos["searchparam"],
+            join_dict,
+            infos["how"],
+            infos["alias"],
+            infos["alias_child"],
+            infos["searchparam"],
         )
 
     config = {
@@ -73,7 +77,15 @@ def update_join_data_line(join_dict, how, alias, alias_child, searchparam):
 
 
 def update_where_data_line(
-    where_dict, how, alias_child, alias, searchparam, prefix, jsonpath, value, ids_values,
+    where_dict,
+    how,
+    alias_child,
+    alias,
+    searchparam,
+    prefix,
+    jsonpath,
+    value,
+    ids_values,
 ):
     if not isNaN(how):
         if alias_child == "patient":

@@ -36,15 +36,15 @@ class TestResource:
     def test_init_without_id_nor_resource(self, mock_get_store):
         """Raises an error if no id nor resource are provided"""
         with pytest.raises(
-            BadRequest, match="An id or a resource must be provided",
+            BadRequest,
+            match="An id or a resource must be provided",
         ):
             Resource()
         assert mock_get_store.call_count == 0
 
     @patch("uuid.uuid4", return_value="uuid")
     def test_create(self, mock_uuid, mock_get_store):
-        """Calls the create method of the fhirstore client and registers the ID
-        """
+        """Calls the create method of the fhirstore client and registers the ID"""
         resource = Patient(gender="male")
         mock_get_store.return_value.normalize_resource.return_value = resource
 
@@ -78,8 +78,7 @@ class TestResource:
         assert r.resource == resource
 
     def test_read(self, mock_get_store):
-        """Calls the read method of the fhirstore client and registers the resource
-        """
+        """Calls the read method of the fhirstore client and registers the resource"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.read.return_value = resource
@@ -101,8 +100,7 @@ class TestResource:
         assert mock_get_store.return_value.read.call_count == 0
 
     def test_update_without_id(self, mock_get_store):
-        """Calls the update method of the fhirstore client and creates the resource
-        """
+        """Calls the update method of the fhirstore client and creates the resource"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.update.return_value = Patient(id="test", gender="other")
@@ -115,8 +113,7 @@ class TestResource:
         assert r.resource == Patient(id="test", gender="other")
 
     def test_update_with_id(self, mock_get_store):
-        """Calls the update method of the fhirstore client and registers the resource
-        """
+        """Calls the update method of the fhirstore client and registers the resource"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.update.return_value = Patient(id="test", gender="other")
@@ -133,7 +130,8 @@ class TestResource:
         r = Resource(id="1")
 
         with pytest.raises(
-            BadRequest, match="Resource id and update payload do not match",
+            BadRequest,
+            match="Resource id and update payload do not match",
         ):
             r = r.update({"id": "2"})
         assert mock_get_store.return_value.update.call_count == 0
@@ -143,14 +141,14 @@ class TestResource:
         r = Resource(id="1")
 
         with pytest.raises(
-            BadRequest, match="Resource data is required to update a resource",
+            BadRequest,
+            match="Resource data is required to update a resource",
         ):
             r = r.update(None)
         assert mock_get_store.return_value.update.call_count == 0
 
     def test_patch(self, mock_get_store):
-        """Applies a patch on the resource by reading and then updating it
-        """
+        """Applies a patch on the resource by reading and then updating it"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.patch.return_value = Patient(id="test", gender="other")
@@ -163,14 +161,14 @@ class TestResource:
         assert r.resource == Patient(id="test", gender="other")
 
     def test_patch_missing_data(self, mock_get_store):
-        """Raises an error when the patch data is not provided
-        """
+        """Raises an error when the patch data is not provided"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         r = Resource(id="test")
 
         with pytest.raises(
-            BadRequest, match="Patch data is required to patch a resource",
+            BadRequest,
+            match="Patch data is required to patch a resource",
         ):
             r.patch(None)
         assert mock_get_store.return_value.patch.call_count == 0
@@ -182,14 +180,14 @@ class TestResource:
         r = Resource(resource=resource)
 
         with pytest.raises(
-            BadRequest, match="Resource ID is required to patch a resource",
+            BadRequest,
+            match="Resource ID is required to patch a resource",
         ):
             r.patch({"some": "patch"})
         assert mock_get_store.return_value.patch.call_count == 0
 
     def test_delete(self, mock_get_store):
-        """Calls the delete method of the fhirstore client
-        """
+        """Calls the delete method of the fhirstore client"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
         r = Resource(resource=resource)
@@ -201,14 +199,14 @@ class TestResource:
         assert r.id is None
 
     def test_delete_missing_id(self, mock_get_store):
-        """Raises an error when the patch data is not provided
-        """
+        """Raises an error when the patch data is not provided"""
         resource = Patient()
         mock_get_store.return_value.normalize_resource.return_value = resource
         r = Resource(resource=resource)
 
         with pytest.raises(
-            BadRequest, match="Resource ID is required to delete it",
+            BadRequest,
+            match="Resource ID is required to delete it",
         ):
             r = r.delete()
         assert mock_get_store.return_value.update.call_count == 0

@@ -20,7 +20,7 @@ def auth_required(f):
         if not auth_header.startswith(prefix):
             raise AuthenticationError("Authorization header malformed or unexisting.")
 
-        token = auth_header[len(prefix):]
+        token = auth_header[len(prefix) :]
 
         try:
             jwt.decode(token, JWT_PUBLIC_KEY, algorithms=["ES256"])

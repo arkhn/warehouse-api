@@ -13,8 +13,7 @@ class DocumentReference(Resource):
     resource = None
 
     def search(self, query_string=None, params=None):
-        """Searchs a resource by calling fhirstore search function
-        """
+        """Searchs a resource by calling fhirstore search function"""
         # FIXME cleanup
         if params.get("$search"):
             bundle = Bundle()

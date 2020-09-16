@@ -106,8 +106,7 @@ class Resource:
         return res
 
     def search(self, query_string=None, params=None) -> Union[Bundle, OperationOutcome]:
-        """Searchs a resource by calling fhirstore search function
-        """
+        """Searchs a resource by calling fhirstore search function"""
         return self.db.search(self.resource_type, query_string=query_string, params=params)
 
     def history(self):

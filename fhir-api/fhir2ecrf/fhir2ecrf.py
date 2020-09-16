@@ -75,10 +75,10 @@ class FHIR2eCRF:
 
     Attributes:
         token (str): bearer token authentication if necessary (default: {None})
-        fhir_api_url (str): The Service Base URL (e.g. http://hapi.fhir.org/baseR4/) 
+        fhir_api_url (str): The Service Base URL (e.g. http://hapi.fhir.org/baseR4/)
         fhir_rules (type(FHIRRules)): an instance of a FHIRRules-type object
         df_crf_attributes (pd.DataFrame): dataframe containing the configurations related to each crf attribute
-    
+
     Example:
         import logging
         from fhir2ecrf import FHIR2eCRF
@@ -104,43 +104,43 @@ class FHIR2eCRF:
     @timing
     def query(self, config_front: dict) -> pd.DataFrame:
         """Perform the query on the FHIR Api according to the config_front of the following form:
-        {
-        "attributes":[
-            {"officialName":"Identifier","customName":"Identifier"},
-            {"officialName":"First name","customName":"First name"},
-            {"officialName":"Last name","customName":"Last name"},
-            {"officialName":"Date of birth","customName":"Date of birth"},
-            {"officialName":"Gender","customName":"Gender"},
-            {"officialName":"Height","customName":"Height"},
-            {"officialName":"Weight","customName":"Weight"},
-            {"officialName":"Medication Name","customName":"Medication name Astelin", "type": "text", "text": "Astelin"},
-            {"officialName":"Medication Code","customName":"Medication code Lidocaine", "type": "text", "text": "8418806.0"},
-            {"officialName":"Temperature","customName":"Temperature"},
-            {"officialName":"Albumine","customName":"Albumine"},
-            {"officialName":"Creatinine","customName":"Creatinine"},
-            {"officialName":"Glucose","customName":"Glucose"},
-            {"officialName":"Bilirubin","customName":"Bilirubin"},
-            {"officialName":"Magnesium","customName":"Magnesium"},
-            {"officialName":"Sodium","customName":"Sodium"},
-            {"officialName":"Potassium","customName":"Potassium"},
-            {"officialName":"ALAT","customName":"ALAT"},
-            {"officialName":"ASAT","customName":"ASAT"},
-            {"officialName":"General diagnostic","customName":"General diagnostic"},
-            {"officialName":"specific diagnostic code","customName":"specific diagnostic code", "type": "text", "text": "69550"},
-            {"officialName":"specific diagnostic text","customName":"specific diagnostic text", "type": "text", "text": "amput"}
-        ],
-        "idPatient":[
-            "id_1",
-            "id_2",
-            ...
-        ]
-    }
+            {
+            "attributes":[
+                {"officialName":"Identifier","customName":"Identifier"},
+                {"officialName":"First name","customName":"First name"},
+                {"officialName":"Last name","customName":"Last name"},
+                {"officialName":"Date of birth","customName":"Date of birth"},
+                {"officialName":"Gender","customName":"Gender"},
+                {"officialName":"Height","customName":"Height"},
+                {"officialName":"Weight","customName":"Weight"},
+                {"officialName":"Medication Name","customName":"Medication name Astelin", "type": "text", "text": "Astelin"},
+                {"officialName":"Medication Code","customName":"Medication code Lidocaine", "type": "text", "text": "8418806.0"},
+                {"officialName":"Temperature","customName":"Temperature"},
+                {"officialName":"Albumine","customName":"Albumine"},
+                {"officialName":"Creatinine","customName":"Creatinine"},
+                {"officialName":"Glucose","customName":"Glucose"},
+                {"officialName":"Bilirubin","customName":"Bilirubin"},
+                {"officialName":"Magnesium","customName":"Magnesium"},
+                {"officialName":"Sodium","customName":"Sodium"},
+                {"officialName":"Potassium","customName":"Potassium"},
+                {"officialName":"ALAT","customName":"ALAT"},
+                {"officialName":"ASAT","customName":"ASAT"},
+                {"officialName":"General diagnostic","customName":"General diagnostic"},
+                {"officialName":"specific diagnostic code","customName":"specific diagnostic code", "type": "text", "text": "69550"},
+                {"officialName":"specific diagnostic text","customName":"specific diagnostic text", "type": "text", "text": "amput"}
+            ],
+            "idPatient":[
+                "id_1",
+                "id_2",
+                ...
+            ]
+        }
 
-        Args:
-            config_front (dict): json instance of the previous configuration file
+            Args:
+                config_front (dict): json instance of the previous configuration file
 
-        Returns:
-            pd.DataFrame: pandas dataframe containing the correspondant data
+            Returns:
+                pd.DataFrame: pandas dataframe containing the correspondant data
         """  # noqa
         post_treatements, columns_renaming, config = self._create_config_fhir2dataset(config_front)
         cols_order = [attribute["customName"] for attribute in config_front["attributes"]]
