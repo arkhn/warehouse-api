@@ -1,3 +1,10 @@
+# This compose file is not suited for production. It is intended for
+# development.
+#
+# Setting the environment should be done in the root dotenv file, to prevent
+# this file from appearing as modified in git. Variables are documented in the
+# dotenv file template.
+
 version: "3.7"
 
 services:
