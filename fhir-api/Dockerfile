@@ -1,30 +1,55 @@
-FROM python:3.8-slim
+########
+# This image compile the dependencies
+########
+FROM python:3.8-slim as compile-image
 
+ENV VIRTUAL_ENV /srv/venv
+ENV PATH "${VIRTUAL_ENV}/bin:${PATH}"
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONPATH "${PYTHONPATH}:/srv"
 
-RUN groupadd api_group && useradd --no-log-init -G api_group api_user
+WORKDIR /srv
 
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get -y install build-essential libpoppler-cpp-dev pkg-config bash git \
+    && apt-get install -y --no-install-recommends build-essential libpoppler-cpp-dev pkg-config git \
     && apt-get autoremove --purge -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+RUN python -m venv ${VIRTUAL_ENV}
+
+COPY requirements.txt  .
+RUN pip install --no-cache-dir --upgrade pip uwsgi
+RUN pip install --no-cache-dir -r requirements.txt
+
+########
+# This image is the runtime
+########
+FROM python:3.8-slim as runtime-image
+
+ENV VIRTUAL_ENV /srv/venv
+ENV PATH "${VIRTUAL_ENV}/bin:${PATH}"
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
 WORKDIR /srv
 
-COPY requirements.txt  /srv/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt --src /usr/local/src
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get autoremove --purge -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY . .
+RUN groupadd uwsgi
+RUN useradd --no-log-init -g uwsgi uwsgi
+USER uwsgi
 
-RUN chmod +x ./start.sh
-RUN chown -R api_user:api_group /usr/local/lib
+# Copy venv with compiled dependencies
+COPY --chown=uwsgi:uwsgi --from=compile-image /srv/venv /srv/venv
 
-USER api_user
+COPY --chown=uwsgi:uwsgi . .
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 2000
 
