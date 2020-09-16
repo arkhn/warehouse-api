@@ -1,7 +1,7 @@
 from uwsgidecorators import postfork
 
-from db import get_store, reset_db_connection
 from app import create_app
+from db import get_store, reset_db_connection
 
 
 @postfork
