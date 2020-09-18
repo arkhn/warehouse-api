@@ -43,9 +43,9 @@
         mkvirtualenv fhir-api --python python3.8 -r requirements/dev.txt
         workon fhir-api
 
-3. Run the application
+3. Run the development server
 
-TODO(vmttn)
+        flask run
 
 ## Code quality
 
