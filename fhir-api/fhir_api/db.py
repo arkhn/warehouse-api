@@ -2,6 +2,7 @@ import elasticsearch
 import pymongo
 
 import fhirstore
+
 from fhir_api import settings
 
 connection = None

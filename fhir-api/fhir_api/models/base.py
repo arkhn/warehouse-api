@@ -7,6 +7,7 @@ from fhir.resources.operationoutcome import OperationOutcome
 from flask import jsonify
 
 import fhirstore
+
 from fhir_api.db import get_store
 from fhir_api.errors import BadRequest
 
