@@ -7,7 +7,7 @@ from fhir_api.errors import BadRequest
 from fhir_api.models.base import BaseResource
 
 
-@patch("models.resource.get_store", autospec=True)
+@patch("fhir_api.models.base.get_store", autospec=True)
 class TestResource:
     def test_init_with_id_no_resource(self, mock_get_store):
         """Gets the DB connection and initializes id and resource_type"""
@@ -18,7 +18,7 @@ class TestResource:
 
         assert r.id == "id"
         assert r.resource is None
-        assert r.resource_type == "Resource"
+        assert r.resource_type == "BaseResource"
 
     def test_init_with_resource(self, mock_get_store):
         """Initializes resource and resource_type"""
@@ -31,7 +31,7 @@ class TestResource:
 
         assert r.id is None
         assert r.resource == Patient(**resource_data)
-        assert r.resource_type == "Resource"
+        assert r.resource_type == "BaseResource"
 
     def test_init_without_id_nor_resource(self, mock_get_store):
         """Raises an error if no id nor resource are provided"""
@@ -227,7 +227,7 @@ class TestResource:
             r = r.delete()
         assert mock_get_store.return_value.update.call_count == 0
 
-    @patch("models.resource.jsonify")
+    @patch("fhir_api.models.base.jsonify")
     def test_json_with_resource(self, mock_jsonify, mock_get_store):
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
@@ -236,7 +236,7 @@ class TestResource:
         r.json()
         mock_jsonify.assert_called_once_with(resource.dict())
 
-    @patch("models.resource.jsonify")
+    @patch("fhir_api.models.base.jsonify")
     def test_json_with_id(self, mock_jsonify, mock_get_store):
         r = BaseResource(id="test")
 
