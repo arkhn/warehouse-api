@@ -48,7 +48,7 @@ USER uwsgi
 # Copy venv with compiled dependencies
 COPY --chown=uwsgi:uwsgi --from=compile-image /srv/venv /srv/venv
 
-COPY --chown=uwsgi:uwsgi ["assets", "fhir_api", "docker-entrypoint.sh", "uwsgi.ini", "/srv/"]
+COPY --chown=uwsgi:uwsgi ["capabilities.json", "fhir_api", "docker-entrypoint.sh", "uwsgi.ini", "/srv/"]
 RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 2000
