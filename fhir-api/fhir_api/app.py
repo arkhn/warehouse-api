@@ -1,3 +1,6 @@
+import glob
+
+import click
 from bson import ObjectId
 from flask import Flask, json
 
@@ -27,3 +30,17 @@ def create_app():
 
 
 app = create_app()
+
+
+@app.cli.command()
+@click.argument("src-dir", type=click.Path(exists=True))
+def load_defs(src_dir):
+    """Load FHIR definitions.
+
+    SRC_DIR is a path to the definitions directory.
+    """
+    store = db.get_store()
+
+    for bundle in glob.glob(f"{src_dir}/*.json"):
+        with open(bundle, "r") as raw_data:
+            store.upload_bundle(json.load(raw_data))
