@@ -4,10 +4,10 @@ from fhir.resources.operationoutcome import OperationOutcome
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS
 
-from authentication import auth_required
-from db import get_store
-from errors import AuthenticationError, BadRequest
-from models import resources_models
+from fhir_api.authentication import auth_required
+from fhir_api.db import get_store
+from fhir_api.errors import AuthenticationError, BadRequest
+from fhir_api.models import resources_models
 
 # from fhir2ecrf import FHIR2eCRF
 

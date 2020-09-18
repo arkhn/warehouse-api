@@ -1,14 +1,14 @@
-import db
-from models import resources
+from fhir_api import db, settings
 
-from .resource import Resource
+from . import resources
+from .base import BaseResource
 
 resources_models = {}
 
 
 def init():
     global resources_models
-    client = db.get_db_connection()[db.DB_NAME]
+    client = db.get_db_connection()[settings.DB_NAME]
     resource_list = client.list_collection_names()
     print("List of supported resources:", resource_list)
     for r in resource_list:
@@ -18,4 +18,4 @@ def init():
         else:
             # if a resource has no specific implementation, create
             # a generic class inheriting from Resource.
-            resources_models[r] = type(r, (Resource,), {})
+            resources_models[r] = type(r, (BaseResource,), {})

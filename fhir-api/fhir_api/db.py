@@ -1,21 +1,12 @@
-import os
-
 import elasticsearch
 import pymongo
 
 import fhirstore
+from fhir_api import settings
 
 connection = None
 connection_es = None
 store = None
-
-DB_NAME = os.getenv("MONGO_DB", "fhirstore")
-DB_HOST = os.getenv("MONGO_HOST", "localhost")
-DB_PORT = os.getenv("MONGO_PORT", "27017")
-DB_USER = os.getenv("MONGO_USER")
-DB_PASSWORD = os.getenv("MONGO_PASSWORD")
-
-ES_URL = os.getenv("ELASTIC_URL", "http://localhost:9200")
 
 
 def reset_db_connection():
@@ -31,15 +22,19 @@ def get_db_connection():
     global connection
     if not connection:
         connection = pymongo.MongoClient(
-            host=DB_HOST, port=int(DB_PORT), username=DB_USER, password=DB_PASSWORD
+            host=settings.DB_HOST,
+            port=settings.DB_PORT,
+            username=settings.DB_USER,
+            password=settings.DB_PASSWORD,
         )
     return connection
 
 
 def get_es_connection():
+
     global connection_es
     if not connection_es:
-        connection_es = elasticsearch.Elasticsearch([ES_URL])
+        connection_es = elasticsearch.Elasticsearch([settings.ES_URL])
     return connection_es
 
 
@@ -53,7 +48,7 @@ def get_store():
     connection = get_db_connection()
     connection_es = get_es_connection()
     if not store:
-        store = fhirstore.FHIRStore(connection, connection_es, DB_NAME)
+        store = fhirstore.FHIRStore(connection, connection_es, settings.DB_NAME)
         if not store.initialized:
             store.bootstrap()
     return store

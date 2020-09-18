@@ -4,7 +4,7 @@ from functools import wraps
 import jwt
 from flask import request
 
-from errors import AuthenticationError
+from fhir_api.errors import AuthenticationError
 
 AUTH_DISABLED = True if os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"] else False
 JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "").replace("\\n", "\n")

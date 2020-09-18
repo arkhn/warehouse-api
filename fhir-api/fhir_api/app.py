@@ -1,9 +1,8 @@
 from bson import ObjectId
 from flask import Flask, json
 
-import db
-import models
-from api import api
+from fhir_api import db, models
+from fhir_api.api import api
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -27,6 +26,4 @@ def create_app():
     return app
 
 
-if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, host="0.0.0.0")
+app = create_app()

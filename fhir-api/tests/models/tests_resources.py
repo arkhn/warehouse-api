@@ -3,8 +3,8 @@ from unittest.mock import patch
 import pytest
 from fhir.resources.patient import Patient
 
-from errors import BadRequest
-from models.resource import Resource
+from fhir_api.errors import BadRequest
+from fhir_api.models.base import BaseResource
 
 
 @patch("models.resource.get_store", autospec=True)
@@ -12,7 +12,7 @@ class TestResource:
     def test_init_with_id_no_resource(self, mock_get_store):
         """Gets the DB connection and initializes id and resource_type"""
         resource_id = "id"
-        r = Resource(id=resource_id)
+        r = BaseResource(id=resource_id)
         assert mock_get_store.call_count == 1
         assert r.db == mock_get_store.return_value
 
@@ -25,7 +25,7 @@ class TestResource:
         resource_data = {"gender": "female"}
         mock_get_store.return_value.normalize_resource.return_value = Patient(**resource_data)
 
-        r = Resource(resource=resource_data)
+        r = BaseResource(resource=resource_data)
         assert mock_get_store.call_count == 1
         assert r.db == mock_get_store.return_value
 
@@ -39,7 +39,7 @@ class TestResource:
             BadRequest,
             match="An id or a resource must be provided",
         ):
-            Resource()
+            BaseResource()
         assert mock_get_store.call_count == 0
 
     @patch("uuid.uuid4", return_value="uuid")
@@ -54,7 +54,7 @@ class TestResource:
 
         mock_get_store.return_value.create.return_value = resource
         mock_get_store.return_value.read.return_value = None
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
 
         r.create()
         mock_get_store.return_value.create.assert_called_once_with(resource)
@@ -63,7 +63,7 @@ class TestResource:
 
     def test_create_missing_resource(self, mock_get_store):
         """Raises an error when the resource data was not provided at init"""
-        r = Resource(id="id")
+        r = BaseResource(id="id")
         with pytest.raises(BadRequest, match="Missing resource data to create a resource"):
             r.create()
         assert mock_get_store.return_value.create.call_count == 0
@@ -75,7 +75,7 @@ class TestResource:
         mock_get_store.return_value.create.return_value = resource
         mock_get_store.return_value.read.return_value = None
 
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
 
         r.create()
         assert r.id == "test"
@@ -91,7 +91,7 @@ class TestResource:
         mock_get_store.return_value.normalize_resource.return_value = resource
         mock_get_store.return_value.read.return_value = resource
 
-        r = Resource(id="test")
+        r = BaseResource(id="test")
 
         r.read()
         mock_get_store.return_value.read.assert_called_once_with("Resource", "test")
@@ -101,7 +101,7 @@ class TestResource:
         """Raises an error when the id was not provided at init"""
         resource = Patient()
         mock_get_store.return_value.normalize_resource.return_value = resource
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
 
         with pytest.raises(BadRequest, match="Resource ID is required"):
             r.read()
@@ -118,7 +118,7 @@ class TestResource:
         mock_get_store.return_value.update.return_value = Patient(id="test", gender="other")
 
         update_data = {"gender": "other"}
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
         r.update(update_data)
 
         mock_get_store.return_value.update.assert_called_once_with("test", update_data)
@@ -135,7 +135,7 @@ class TestResource:
         mock_get_store.return_value.update.return_value = Patient(id="test", gender="other")
 
         update_data = {"gender": "other"}
-        r = Resource(id="test", resource=resource)
+        r = BaseResource(id="test", resource=resource)
         r.update(update_data)
 
         mock_get_store.return_value.update.assert_called_once_with("test", update_data)
@@ -143,7 +143,7 @@ class TestResource:
 
     def test_update_id_dont_match(self, mock_get_store):
         """Raises an error when the resource was not provided"""
-        r = Resource(id="1")
+        r = BaseResource(id="1")
 
         with pytest.raises(
             BadRequest,
@@ -154,7 +154,7 @@ class TestResource:
 
     def test_update_missing_resource(self, mock_get_store):
         """Raises an error when the resource was not provided"""
-        r = Resource(id="1")
+        r = BaseResource(id="1")
 
         with pytest.raises(
             BadRequest,
@@ -170,7 +170,7 @@ class TestResource:
         mock_get_store.return_value.patch.return_value = Patient(id="test", gender="other")
 
         patch_data = {"gender": "other"}
-        r = Resource(id="test", resource=resource)
+        r = BaseResource(id="test", resource=resource)
         r.patch(patch_data)
 
         mock_get_store.return_value.patch.assert_called_once_with("Resource", "test", patch_data)
@@ -180,7 +180,7 @@ class TestResource:
         """Raises an error when the patch data is not provided"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
-        r = Resource(id="test")
+        r = BaseResource(id="test")
 
         with pytest.raises(
             BadRequest,
@@ -193,7 +193,7 @@ class TestResource:
         """Raises an error when the resource id was not provided at init"""
         resource = Patient(gender="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
 
         with pytest.raises(
             BadRequest,
@@ -206,7 +206,7 @@ class TestResource:
         """Calls the delete method of the fhirstore client"""
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
 
         r.delete()
 
@@ -218,7 +218,7 @@ class TestResource:
         """Raises an error when the patch data is not provided"""
         resource = Patient()
         mock_get_store.return_value.normalize_resource.return_value = resource
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
 
         with pytest.raises(
             BadRequest,
@@ -231,14 +231,14 @@ class TestResource:
     def test_json_with_resource(self, mock_jsonify, mock_get_store):
         resource = Patient(id="test")
         mock_get_store.return_value.normalize_resource.return_value = resource
-        r = Resource(resource=resource)
+        r = BaseResource(resource=resource)
 
         r.json()
         mock_jsonify.assert_called_once_with(resource.dict())
 
     @patch("models.resource.jsonify")
     def test_json_with_id(self, mock_jsonify, mock_get_store):
-        r = Resource(id="test")
+        r = BaseResource(id="test")
 
         r.json()
         mock_jsonify.assert_called_once_with({"id": "test"})

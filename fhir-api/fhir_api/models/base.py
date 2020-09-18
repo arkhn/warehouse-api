@@ -7,11 +7,11 @@ from fhir.resources.operationoutcome import OperationOutcome
 from flask import jsonify
 
 import fhirstore
-from db import get_store
-from errors import BadRequest
+from fhir_api.db import get_store
+from fhir_api.errors import BadRequest
 
 
-class Resource:
+class BaseResource:
     resource: Union[None, FHIRAbstractModel] = None
 
     def __init__(self, id=None, resource: Union[None, Dict, FHIRAbstractModel] = None):

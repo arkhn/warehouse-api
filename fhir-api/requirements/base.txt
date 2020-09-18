@@ -12,3 +12,4 @@ uwsgidecorators==1.1.0
 pandas==1.0.3
 fhir2dataset==0.1.2
 arkhn_arx==0.0.8
+python-dotenv==0.14.0

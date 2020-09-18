@@ -1,5 +1,5 @@
-from models.resource import Resource
+from fhir_api.models.base import BaseResource
 
 
-class Patient(Resource):
+class Patient(BaseResource):
     resource = None
