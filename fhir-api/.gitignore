@@ -88,6 +88,5 @@ bin/
 include/
 
 # Misc
-# TODO(vmttn): uncomment next line
 *.env
 !.template.env
