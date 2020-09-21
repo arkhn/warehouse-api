@@ -4,3 +4,8 @@
 **/venv/
 **/build/
 **/dist/
+**/.tox/
+**/.pytest_cache/
+
+# VSCode
+**/.vscode/
