@@ -57,4 +57,6 @@ Code quality is enforced with `pre-commit` hooks: `black`, `isort`, `flake8`
 
 ## Tests
 
-TODO(vmttn)
+1. Run tests in dedicated virtual env.
+
+        tox

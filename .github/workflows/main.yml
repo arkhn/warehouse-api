@@ -22,6 +22,9 @@ jobs:
     needs: lint
     runs-on: ubuntu-18.04
 
+    outputs:
+      tags: ${{ steps.metadata.outputs.tags }}
+
     steps:
       - id: metadata
         run: |
@@ -38,11 +41,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_LOGIN }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      #      - run: |
-      #          docker build fhir-api -f fhir-api/Dockerfile -t ${{ steps.metadata.outputs.tag }} -t ${{ steps.metadata.outputs.registry }}/${{ github.repository }}/fhir-api:${{ steps.metadata.outputs.version }}
-      #          docker push docker.pkg.github.com/${{ github.repository }}/fhir-api:${{ steps.metadata.outputs.version }}
-
       - uses: docker/build-push-action@v2
         with:
           context: fhir-api
@@ -60,10 +58,15 @@ jobs:
             com.arkhn.image.revision=${{ github.sha }}
             com.arkhn.image.licenses=${{ github.event.repository.license.spdx_id }}
 
-#      - name: Test with pytest
-#        run: |
-#          cd fhir-api
-#          python -m pytest -svv tests/
+  tests:
+    needs: build
+    runs-on: ubuntu-18.04
+
+    steps:
+      - run: |
+          IMAGE=$(echo ${{ needs.build.outputs.tags }} | cut -f1 -d,)
+          docker pull ${IMAGE}
+          docker run --entrypoint=pytest ${IMAGE}
 
 #  publish:
 #    name: Build and publish

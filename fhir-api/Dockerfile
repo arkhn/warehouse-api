@@ -21,7 +21,7 @@ RUN python -m venv ${VIRTUAL_ENV}
 
 COPY requirements requirements
 RUN pip install --no-cache-dir --upgrade pip uwsgi
-RUN pip install --no-cache-dir -r requirements/base.txt
+RUN pip install --no-cache-dir -r requirements/tests.txt
 
 ########
 # This image is the runtime
@@ -50,6 +50,7 @@ COPY --chown=uwsgi:uwsgi --from=compile-image /srv/venv /srv/venv
 
 COPY --chown=uwsgi:uwsgi ["capabilities.json", "docker-entrypoint.sh", "uwsgi.ini", "/srv/"]
 COPY --chown=uwsgi:uwsgi fhir_api /srv/fhir_api
+COPY --chown=uwsgi:uwsgi tests /srv/tests
 RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 2000
