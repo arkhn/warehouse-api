@@ -31,6 +31,9 @@ jobs:
           IMAGE=arkhn/fhir-api
           VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
           TAGS="${IMAGE}:${VERSION},${IMAGE}:${GITHUB_SHA::8}"
+          if [[ ${GITHUB_REF} == refs/heads/master ]]; then
+            TAGS="${TAGS},${IMAGE}:latest"
+          fi
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -67,24 +70,3 @@ jobs:
           IMAGE=$(echo ${{ needs.build.outputs.tags }} | cut -f1 -d,)
           docker pull ${IMAGE}
           docker run --entrypoint=pytest ${IMAGE}
-
-#  publish:
-#    name: Build and publish
-#    env:
-#      GITHUB_REGISTRY: docker.pkg.github.com
-#      IMAGE: arkhn/fhir-api
-#      TAG: latest
-#    runs-on: ubuntu-18.04
-#    needs: build
-#    if: github.ref == 'refs/heads/master'
-#    steps:
-#        run: docker build -t $IMAGE:$TAG -f fhir-api/Dockerfile fhir-api/
-#      - name: Publish to the docker hub
-#        run: |
-#          echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
-#          docker push $IMAGE:$TAG
-#      - name: Publish to Github Packages
-#        run: |
-#          echo "${{ secrets.GITHUB_TOKEN }}" | docker login $GITHUB_REGISTRY -u ${{ github.actor }} --password-stdin
-#          docker tag $IMAGE:$TAG $GITHUB_REGISTRY/${{ github.repository }}/fhir-api:$TAG
-#          docker push $GITHUB_REGISTRY/${{ github.repository }}/fhir-api:$TAG
