@@ -27,38 +27,38 @@ jobs:
         run: |
           IMAGE=arkhn/fhir-api
           VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-          TAG="${IMAGE}:${VERSION}"
+          TAGS="${IMAGE}:${VERSION},${IMAGE}:${GITHUB_SHA::8}"
           echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tag::${TAG}
+          echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
         with:
-          registry: docker.pkg.github.com
           username: ${{ secrets.DOCKER_LOGIN }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - run: |
-          docker build fhir-api -f fhir-api/Dockerfile -t ${{ steps.metadata.outputs.tag }}
-          docker push docker.pkg.github.com/${{ github.repository }}/fhir-api:${{ steps.metadata.outputs.version }}
 
-#      - uses: docker/build-push-action@v2
-#        with:
-#          context: fhir-api
-#          file: ./fhir-api/Dockerfile
-#          platforms: linux/amd64
-#          push: true
-#          tags: ${{ steps.metadata.outputs.tags }}
-#          labels: |
-#            com.arkhn.image.title=fhir-api
-#            com.arkhn.image.description=${{ github.event.repository.description }}
-#            com.arkhn.image.url=${{ github.event.repository.html_url }}
-#            com.arkhn.image.source=${{ github.event.repository.clone_url }}
-#            com.arkhn.image.version=${{ steps.metadata.outputs.version }}
-#            com.arkhn.image.created=${{ steps.metadata.outputs.created }}
-#            com.arkhn.image.revision=${{ github.sha }}
-#            com.arkhn.image.licenses=${{ github.event.repository.license.spdx_id }}
+      #      - run: |
+      #          docker build fhir-api -f fhir-api/Dockerfile -t ${{ steps.metadata.outputs.tag }} -t ${{ steps.metadata.outputs.registry }}/${{ github.repository }}/fhir-api:${{ steps.metadata.outputs.version }}
+      #          docker push docker.pkg.github.com/${{ github.repository }}/fhir-api:${{ steps.metadata.outputs.version }}
+
+      - uses: docker/build-push-action@v2
+        with:
+          context: fhir-api
+          file: ./fhir-api/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: |
+            com.arkhn.image.title=fhir-api
+            com.arkhn.image.description=${{ github.event.repository.description }}
+            com.arkhn.image.url=${{ github.event.repository.html_url }}
+            com.arkhn.image.source=${{ github.event.repository.clone_url }}
+            com.arkhn.image.version=${{ steps.metadata.outputs.version }}
+            com.arkhn.image.created=${{ steps.metadata.outputs.created }}
+            com.arkhn.image.revision=${{ github.sha }}
+            com.arkhn.image.licenses=${{ github.event.repository.license.spdx_id }}
 
 #      - name: Test with pytest
 #        run: |
