@@ -94,7 +94,7 @@ class TestResource:
         r = BaseResource(id="test")
 
         r.read()
-        mock_get_store.return_value.read.assert_called_once_with("Resource", "test")
+        mock_get_store.return_value.read.assert_called_once_with("BaseResource", "test")
         assert r.resource == resource
 
     def test_read_missing_id(self, mock_get_store):
@@ -173,7 +173,9 @@ class TestResource:
         r = BaseResource(id="test", resource=resource)
         r.patch(patch_data)
 
-        mock_get_store.return_value.patch.assert_called_once_with("Resource", "test", patch_data)
+        mock_get_store.return_value.patch.assert_called_once_with(
+            "BaseResource", "test", patch_data
+        )
         assert r.resource == Patient(id="test", gender="other")
 
     def test_patch_missing_data(self, mock_get_store):
@@ -210,7 +212,7 @@ class TestResource:
 
         r.delete()
 
-        mock_get_store.return_value.delete.assert_called_once_with("Resource", "test")
+        mock_get_store.return_value.delete.assert_called_once_with("BaseResource", "test")
         assert r.resource is None
         assert r.id is None
 
