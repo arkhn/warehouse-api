@@ -1,4 +1,4 @@
-import { IAction } from '../types';
+import { IAction, User } from '../types';
 
 export const updateParameter = (
   index: number,
@@ -33,4 +33,13 @@ export const deleteParameter = (index: number): IAction => {
 export const newQuery = (url: string): IAction => ({
   type: 'NEW_QUERY',
   payload: url,
+});
+
+export const updateUser = (user: User): IAction => ({
+  type: 'UPDATE_USER',
+  payload: user,
+});
+
+export const logoutUser = (): IAction => ({
+  type: 'LOGOUT',
 });

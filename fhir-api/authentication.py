@@ -1,15 +1,24 @@
 from flask import request
 from functools import wraps
-import jwt
 import os
+import requests
 
 from errors import AuthenticationError
 
+TOKEN_INTROSPECTION_URL = os.getenv("TOKEN_INTROSPECTION_URL")
 AUTH_DISABLED = True if os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"] else False
-JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "").replace("\\n", "\n")
 
-if not AUTH_DISABLED and not JWT_PUBLIC_KEY:
-    raise Exception("missing JWT_PUBLIC_KEY")
+
+def validate_token(token, scope=None):
+    payload = {"token": token}
+    if scope is not None:
+        payload["scope"] = scope
+
+    response = requests.post(TOKEN_INTROSPECTION_URL, data=payload)
+
+    validation = response.json()
+
+    return validation["active"]
 
 
 def auth_required(f):
@@ -22,9 +31,7 @@ def auth_required(f):
 
         token = auth_header[len(prefix):]
 
-        try:
-            jwt.decode(token, JWT_PUBLIC_KEY, algorithms=["ES256"])
-        except jwt.DecodeError:
+        if not validate_token(token):
             raise AuthenticationError("Failed to verify token.")
 
         return f(*args, **kwargs)

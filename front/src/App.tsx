@@ -1,9 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import { ApolloProvider } from 'react-apollo';
-import { HttpLink, InMemoryCache, ApolloClient } from 'apollo-client-preset';
-import { ApolloLink } from 'apollo-link';
-import { onError } from 'apollo-link-error';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import { persistStore, persistReducer } from 'redux-persist';
@@ -15,59 +11,63 @@ import Routes from './routes';
 import {
   searchParametersReducer,
   searchHistoryReducer,
+  userReducer,
 } from './redux/reducers';
+import { logoutUser } from './redux/actions';
 
-import { AUTH_API_URL, TOKEN_STORAGE_KEY } from './constants';
+import {
+  getAccessToken,
+  refreshToken,
+  removeTokens,
+} from './services/tokenManager';
+import { FHIR_API_URL, TOKEN_URL } from './constants';
+import { ISimpleAction } from './types';
 
 // AXIOS
 
-// Interceptor to add authorization header for each requests
+const redirectToLogin = () => {
+  removeTokens();
+  store.dispatch(logoutUser() as ISimpleAction);
+};
+
+// Interceptor to add authorization header for each requests to the API
 axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-  config.headers.Authorization = `Bearer ${token}`;
+  if (config.url?.startsWith(FHIR_API_URL!)) {
+    const token = getAccessToken();
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
-// APOLLO
+// Add an interceptor to refresh access token when needed
+axios.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
 
-// HttpLink
-const httpLink = new HttpLink({
-  uri: AUTH_API_URL,
-  fetch: fetch,
-});
+    if (
+      error.response.status === 401 &&
+      originalRequest.url.startsWith(TOKEN_URL)
+    ) {
+      redirectToLogin();
+      return Promise.reject(error);
+    }
 
-const middlewareLink = new ApolloLink((operation, forward) => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-  operation.setContext({
-    headers: {
-      Authorization: token ? `Bearer ${token}` : '',
-    },
-  });
-
-  return forward(operation);
-});
-
-const httpLinkAuth = middlewareLink.concat(httpLink);
-
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors)
-    graphQLErrors.map(({ message, locations, path }) =>
-      console.log(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
-    );
-
-  if (networkError) console.log(`[Network error]: ${networkError}`);
-});
-
-// Aggregate all links
-const links = [];
-if (process.env.NODE_ENV === 'development') {
-  links.push(errorLink);
-}
-
-links.push(httpLinkAuth);
+      const success = await refreshToken();
+      if (!success) {
+        redirectToLogin();
+        return Promise.reject(error);
+      }
+      return axios(originalRequest);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // REDUX
 const middlewares = [
@@ -91,6 +91,7 @@ const finalCreateStore = applyMiddleware(...middlewares)(createStore);
 const mainReducer = combineReducers({
   searchParameters: searchParametersReducer,
   searchHistory: searchHistoryReducer,
+  user: userReducer,
 });
 
 const persistConfig = {
@@ -103,19 +104,10 @@ const store = finalCreateStore(persistedReducer);
 
 export const persistor = persistStore(store);
 
-// Client
-export const client = new ApolloClient({
-  cache: new InMemoryCache(),
-  connectToDevTools: true,
-  link: ApolloLink.from(links),
-});
-
 export default () => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <ApolloProvider client={client}>
-        <Routes />
-      </ApolloProvider>
+      <Routes />
     </PersistGate>
   </Provider>
 );
