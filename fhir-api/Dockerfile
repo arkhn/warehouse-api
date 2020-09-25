@@ -28,6 +28,11 @@ RUN pip install --no-cache-dir -r requirements/tests.txt
 ########
 FROM python:3.8-slim as runtime-image
 
+ARG VERSION_SHA
+ARG VERSION_NAME
+ENV VERSION_SHA $VERSION_SHA
+ENV VERSION_NAME $VERSION_NAME
+
 ENV VIRTUAL_ENV /srv/venv
 ENV PATH "${VIRTUAL_ENV}/bin:${PATH}"
 ENV PYTHONUNBUFFERED 1
