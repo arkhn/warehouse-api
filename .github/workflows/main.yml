@@ -53,6 +53,9 @@ jobs:
         with:
           context: fhir-api
           file: ./fhir-api/Dockerfile
+          build-args: |
+            VERSION_NAME=${{ steps.metadata.outputs.version }}
+            VERSION_SHA=${GITHUB_SHA::8}
           platforms: linux/amd64
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
