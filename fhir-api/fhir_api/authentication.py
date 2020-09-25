@@ -1,15 +1,12 @@
-import os
 from functools import wraps
 
 import jwt
 from flask import request
 
+from fhir_api import settings
 from fhir_api.errors import AuthenticationError
 
-AUTH_DISABLED = True if os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"] else False
-JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "").replace("\\n", "\n")
-
-if not AUTH_DISABLED and not JWT_PUBLIC_KEY:
+if not settings.AUTH_DISABLED and not settings.JWT_PUBLIC_KEY:
     raise Exception("missing JWT_PUBLIC_KEY")
 
 
@@ -24,10 +21,10 @@ def auth_required(f):
         token = auth_header[len(prefix) :]
 
         try:
-            jwt.decode(token, JWT_PUBLIC_KEY, algorithms=["ES256"])
+            jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=["ES256"])
         except jwt.DecodeError:
             raise AuthenticationError("Failed to verify token.")
 
         return f(*args, **kwargs)
 
-    return f if AUTH_DISABLED else decorated_function
+    return f if settings.AUTH_DISABLED else decorated_function

@@ -11,3 +11,6 @@ DB_USER = os.getenv("MONGO_USER")
 DB_PASSWORD = os.getenv("MONGO_PASSWORD")
 
 ES_URL = os.getenv("ELASTIC_URL", "http://localhost:9200")
+
+AUTH_DISABLED = os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"]
+JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "").replace("\\n", "\n")
