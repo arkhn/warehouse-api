@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fhir.resources.operationoutcome import OperationOutcome
 from flask import Blueprint, jsonify, request
@@ -131,3 +132,12 @@ def handle_bad_request(e):
 @api.errorhandler(AuthenticationError)
 def handle_not_authorized(e):
     return str(e), 401
+
+
+@api.route("/version/", methods=["GET"])
+def version():
+    data = {
+        "commit": os.environ.get("VERSION_SHA", "") or None,
+        "version": os.environ.get("VERSION_NAME", "") or None,
+    }
+    return jsonify(data)
