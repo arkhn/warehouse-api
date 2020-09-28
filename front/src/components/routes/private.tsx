@@ -10,7 +10,11 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { fetchTokens, removeTokens } from '../../services/tokenManager';
 import { updateUser } from '../../redux/actions';
-import { STATE_STORAGE_KEY, ID_TOKEN_STORAGE_KEY } from '../../constants';
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  ID_TOKEN_STORAGE_KEY,
+  STATE_STORAGE_KEY,
+} from '../../constants';
 import { IReduxStore } from '../../types';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -29,6 +33,7 @@ const PrivateRoute = ({ component: Component, render, ...rest }: any) => {
 
   const params = queryString.parse(window.location.search);
 
+  const accessToken = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const storedState = localStorage.getItem(STATE_STORAGE_KEY);
   const stateMatch =
     'code' in params && 'state' in params && params.state === storedState;
@@ -50,7 +55,7 @@ const PrivateRoute = ({ component: Component, render, ...rest }: any) => {
   }, [stateMatch, setLoggedInUser]);
 
   // Redirect to the login page
-  if (!user.email) {
+  if (!user.email && !accessToken) {
     if ('code' in params) {
       // Wait for the code to be exchanged for a token
       return (
@@ -75,12 +80,7 @@ const PrivateRoute = ({ component: Component, render, ...rest }: any) => {
     }
   }
 
-  return (
-    <Route
-      {...rest}
-      render={(props) => <Component {...props} />}
-    />
-  );
+  return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
 
 export default PrivateRoute;
