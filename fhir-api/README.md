@@ -121,6 +121,20 @@ python app.py
 # Open your browser to http://localhost:5000
 ```
 
+### MongoDB management:
+
+```shell
+# Disable JSON schema validation:
+env $(cat .env.<target>) python scripts/disable_json_validator.py
+```
+
+### Elasticsearch management:
+
+```shell
+# Rebuild ES index:
+env $(cat .env.<target>) python scripts/rebuild_es_index.py
+```
+
 ### Tests
 
 ```bash
