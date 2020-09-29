@@ -1,28 +1,23 @@
 import TextField from '@material-ui/core/TextField';
-import clsx from 'clsx';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import SearchIcon from '@material-ui/icons/Search';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
-import HistoryIcon from '@material-ui/icons/History';
 
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import AppBar from '../appBar';
 import SwitchViews from '../switchViews';
 import FhirObject from './fhirObject';
 import SearchParameterTable from './searchParameterTable';
+import SearchBar from './searchBar';
 import { newQuery } from '../../redux/actions';
 
 import { FHIR_API_URL } from '../../constants';
-import { IReduxStore } from '../../types';
 
 import './style.scss';
 
@@ -61,15 +56,11 @@ const Search = (): React.ReactElement => {
   const classes = useStyles();
 
   const dispatch = useDispatch();
-  const { searchParameters, searchHistory } = useSelector(
-    (state: IReduxStore) => state
-  );
 
   const [fhirCollections, setFhirCollections] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState('');
   const [fhirBundle, setFhirBundle] = useState({} as any);
   const [apiErrors, setApiErrors] = useState([] as string[]);
-  const [fhirUrl, setfFhirUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const getFhirCollections = async () => {
@@ -86,18 +77,7 @@ const Search = (): React.ReactElement => {
     getFhirCollections();
   }, []);
 
-  useEffect(() => {
-    const searchUrl = searchParameters
-      .filter((param) => param.parameter && param.value)
-      .map((param) => `${param.parameter}=${param.value}`);
-    setfFhirUrl(
-      `${FHIR_API_URL}${selectedCollection ? '/' + selectedCollection : ''}${
-        searchUrl.length > 0 ? '?' + searchUrl.join('&') : ''
-      }`
-    );
-  }, [selectedCollection, searchParameters]);
-
-  const executeFhirQuery = async () => {
+  const executeFhirQuery = async (fhirUrl: string) => {
     dispatch(newQuery(fhirUrl));
     setApiErrors([]);
     setFhirBundle([]);
@@ -157,37 +137,7 @@ const Search = (): React.ReactElement => {
             }}
           />
           <SearchParameterTable type={selectedCollection} />
-          <Paper component="form" elevation={0} className={classes.paperForm}>
-            <Autocomplete
-              options={searchHistory}
-              size="small"
-              freeSolo={true}
-              fullWidth={true}
-              renderInput={(params) => <TextField {...params} />}
-              forcePopupIcon={true}
-              popupIcon={<HistoryIcon />}
-              value={fhirUrl}
-              onChange={(_: any, value: string | null) =>
-                value && setfFhirUrl(value)
-              }
-              ListboxProps={{
-                className: classes.searchBarDropdown,
-              }}
-              onKeyPress={(ev) => {
-                if (ev.key === 'Enter') {
-                  ev.preventDefault();
-                  executeFhirQuery();
-                }
-              }}
-            />
-            <IconButton
-              className={classes.iconButton}
-              aria-label="search"
-              onClick={executeFhirQuery}
-            >
-              <SearchIcon />
-            </IconButton>
-          </Paper>
+          <SearchBar selectedCollection={selectedCollection} executeFhirQuery={executeFhirQuery}/>
           {apiErrors.length > 0 &&
             apiErrors.map((apiError) => (
               <Alert severity="error" className={classes.alertError}>
