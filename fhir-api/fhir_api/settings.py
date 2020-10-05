@@ -13,4 +13,6 @@ DB_PASSWORD = os.getenv("MONGO_PASSWORD")
 ES_URL = os.getenv("ELASTIC_URL", "http://localhost:9200")
 
 AUTH_DISABLED = os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"]
-JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "").replace("\\n", "\n")
+
+TOKEN_INTROSPECTION_URL = os.getenv("TOKEN_INTROSPECTION_URL")
+AUTH_DISABLED = True if os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"] else False

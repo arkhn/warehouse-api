@@ -9,6 +9,7 @@ from fhir_api.authentication import auth_required
 from fhir_api.db import get_store
 from fhir_api.errors import AuthenticationError, BadRequest
 from fhir_api.models import resources_models
+from multidict import MultiDict
 
 # from fhir2ecrf import FHIR2eCRF
 
@@ -87,7 +88,9 @@ def delete(resource_type, id):
 @api.route("/<resource_type>", methods=["GET"])
 @auth_required
 def search(resource_type=None):
-    return get_store().search(resource_type, params=request.args).json()
+    # transform werkzeug.datastructures.ImmutableMultiDict to MultiDict
+    params = MultiDict(request.args.items(multi=True))
+    return get_store().search(resource_type, params=params).json()
 
 
 @api.route("/list-collections", methods=["GET"])

@@ -1,5 +1,10 @@
 import redux from 'redux';
 
+export interface User {
+  name: string;
+  email: string;
+}
+
 // REDUX
 export interface ISimpleAction {
   type: string;
@@ -15,6 +20,8 @@ export type IAction = ISimpleAction | IThunkAction | Promise<any>;
 
 export interface IReduxStore {
   searchParameters: ParameterValue[];
+  searchHistory: string[];
+  user: User;
 }
 
 export interface ParameterValue {

@@ -7,9 +7,8 @@ import IconButton from '@material-ui/core/IconButton';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 
-import useRouter from 'use-react-router';
-
-import { TOKEN_STORAGE_KEY } from '../../constants';
+import { getIdToken, removeTokens } from '../../services/tokenManager';
+import { LOGOUT_URL, LOGOUT_REDIRECT_URL } from '../../constants';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -35,11 +34,15 @@ const useStyles = makeStyles((theme: Theme) =>
 const FrontApiBar = () => {
   const classes = useStyles();
 
-  const { history } = useRouter();
+  const logout = async () => {
+    // Hydra logout
+    const idToken = getIdToken();
+    if (!idToken) throw new Error("Can't logout, id token not found.");
+    const logoutUrl = `${LOGOUT_URL}?id_token_hint=${idToken}&post_logout_redirect_uri=${LOGOUT_REDIRECT_URL}`;
 
-  const logout = () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    history.push('/login');
+    await removeTokens();
+
+    window.location.assign(logoutUrl);
   };
 
   return (

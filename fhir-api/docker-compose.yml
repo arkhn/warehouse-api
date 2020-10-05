@@ -26,7 +26,6 @@ services:
       - MONGO_PASSWORD=${MONGO_PASSWORD}
       - ELASTIC_URL=${ELASTIC_HOST:-elasticsearch}:${ELASTIC_PORT:-9200}
       - AUTH_DISABLED=${AUTH_DISABLED:-True}
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
     volumes:
       - ${DEFINITIONS_DIR:-./data/definitions}:/var/data/definitions
 

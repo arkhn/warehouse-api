@@ -16,7 +16,6 @@ class JSONEncoder(json.JSONEncoder):
 
 
 def create_app():
-    # Check for environment variables
     app = Flask(__name__)
     app.register_blueprint(api)
     app.json_encoder = JSONEncoder

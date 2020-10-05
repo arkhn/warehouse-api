@@ -1,13 +1,22 @@
 from functools import wraps
 
-import jwt
 from flask import request
 
+import requests
 from fhir_api import settings
 from fhir_api.errors import AuthenticationError
 
-if not settings.AUTH_DISABLED and not settings.JWT_PUBLIC_KEY:
-    raise Exception("missing JWT_PUBLIC_KEY")
+
+def validate_token(token, scope=None):
+    payload = {"token": token}
+    if scope is not None:
+        payload["scope"] = scope
+
+    response = requests.post(settings.TOKEN_INTROSPECTION_URL, data=payload)
+
+    validation = response.json()
+
+    return validation["active"]
 
 
 def auth_required(f):
@@ -20,9 +29,7 @@ def auth_required(f):
 
         token = auth_header[len(prefix) :]
 
-        try:
-            jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=["ES256"])
-        except jwt.DecodeError:
+        if not validate_token(token):
             raise AuthenticationError("Failed to verify token.")
 
         return f(*args, **kwargs)
