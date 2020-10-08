@@ -56,7 +56,7 @@ const PrivateRoute = ({ component: Component, render, ...rest }: any) => {
 
   // Redirect to the login page
   if (!user.email && !accessToken) {
-    if ('code' in params) {
+    if (stateMatch) {
       // Wait for the code to be exchanged for a token
       return (
         <div className="spinner">
