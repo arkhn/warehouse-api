@@ -13,10 +13,10 @@ jobs:
           node-version: 12
       - uses: actions/cache@v1
         with:
-          path: client/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('client/yarn.lock') }}
-      - run: yarn --cwd ./client install
-      - run: CI=false yarn --cwd ./client build
+          path: front/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('front/yarn.lock') }}
+      - run: yarn --cwd ./front install
+      - run: CI=false yarn --cwd ./front build
 
   publish:
     needs: build
