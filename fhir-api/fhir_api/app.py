@@ -1,4 +1,5 @@
 import glob
+import logging
 
 import click
 from bson import ObjectId
@@ -43,3 +44,24 @@ def load_defs(src_dir):
     for bundle in glob.glob(f"{src_dir}/*.json"):
         with open(bundle, "r") as raw_data:
             store.upload_bundle(json.load(raw_data))
+
+
+@app.cli.command()
+def disable_json_validator():
+    store = db.get_store()
+    for r in store.resources:
+        logging.info(f"Disabling collection validator for resource {r}...")
+        res = store.db.command({"collMod": r, "validator": {}})
+        logging.info(f"Done! ({res})")
+
+
+@app.cli.command()
+def rebuild_es_index():
+    store = db.get_store()
+
+    logging.info(f"Dropping ES index {store.search_engine.get_index_name()}...")
+    store.reset(mongo=False, es=True)
+    logging.info("Done!")
+
+    logging.info("Rebuilding ES index...")
+    store.search_engine.create_es_index()
