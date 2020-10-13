@@ -2,9 +2,9 @@ import os
 import re
 
 from flask import jsonify
-from pysin import search as document_search
 
 from fhirstore.search import Bundle
+from pysin import search as document_search
 
 from fhir_api.db import get_store
 from fhir_api.models.base import BaseResource

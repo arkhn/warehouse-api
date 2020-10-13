@@ -1,8 +1,8 @@
 from functools import wraps
 
+import requests
 from flask import request
 
-import requests
 from fhir_api import settings
 from fhir_api.errors import AuthenticationError
 
