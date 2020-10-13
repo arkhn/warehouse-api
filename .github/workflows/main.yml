@@ -1,6 +1,9 @@
 name: fhir-api
 
-on: push
+on:
+  push:
+    paths:
+      - "fhir-api/**"
 
 jobs:
   lint:
