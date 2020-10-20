@@ -30,6 +30,7 @@ services:
       - AUTH_DISABLED=${AUTH_DISABLED:-True}
     volumes:
       - ${DEFINITIONS_DIR:-./data/definitions}:/var/data/definitions
+      - ${DOCUMENTS_PATH:-./data/documents}:/var/data/documents
 
   mongo:
     image: mongo:4.2
