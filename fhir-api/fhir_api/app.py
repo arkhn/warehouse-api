@@ -48,6 +48,7 @@ def load_defs(src_dir):
 
 @app.cli.command()
 def disable_json_validator():
+    """Disable the mongo JSON schema validator for all collections"""
     store = db.get_store()
     for r in store.resources:
         logging.info(f"Disabling collection validator for resource {r}...")
@@ -57,6 +58,10 @@ def disable_json_validator():
 
 @app.cli.command()
 def rebuild_es_index():
+    """
+    Deletes the elasticsearch index and re-creates it.
+    Warning: all the documents in the index will be lost.
+    """
     store = db.get_store()
 
     logging.info(f"Dropping ES index {store.search_engine.get_index_name()}...")
