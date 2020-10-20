@@ -19,4 +19,6 @@ ES_URL = f"http://{ES_USERNAME}{':'+ES_PASSWORD if ES_PASSWORD else ''}@{ES_HOST
 AUTH_DISABLED = os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"]
 
 TOKEN_INTROSPECTION_URL = os.getenv("TOKEN_INTROSPECTION_URL")
-AUTH_DISABLED = True if os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"] else False
+
+# Pysin
+os.environ.setdefault("DOCUMENTS_PATH", "/var/data/documents")
