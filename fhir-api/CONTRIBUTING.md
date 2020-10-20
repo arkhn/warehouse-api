@@ -13,7 +13,7 @@
 
         # Minimal configuration in .env
         MONGO_PASSWORD=whatever
-        ELASTIC_PASSWORD=whatever
+        ES_PASSWORD=whatever
 
 2.  Deploy mongo
 

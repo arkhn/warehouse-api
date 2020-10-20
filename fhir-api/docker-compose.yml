@@ -24,7 +24,10 @@ services:
       - MONGO_PORT=${MONGO_PORT:-27017}
       - MONGO_USER=${MONGO_USER:-arkhn}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-      - ELASTIC_URL=${ELASTIC_URL}
+      - ES_HOST=${ES_HOST:-elasticsearch}
+      - ES_PORT=${ES_PORT:-9200}
+      - ES_USERNAME=${ES_USERNAME:-elastic}
+      - ES_PASSWORD=${ES_PASSWORD}
       - AUTH_DISABLED=${AUTH_DISABLED:-True}
     volumes:
       - ${DEFINITIONS_DIR:-./data/definitions}:/var/data/definitions
@@ -45,13 +48,13 @@ services:
     restart: always
     environment:
       - ELASTIC_USER=${ELASTIC_USER:-elastic}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
       - discovery.type=single-node
     ports:
       - ${ELASTIC_PORT:-9200}:9200
 
   monstache:
-    image: rwynn/monstache:6.7.0
+    image: arkhn/monstache:6.6.0
     restart: always
     depends_on:
       - elasticsearch
@@ -60,6 +63,6 @@ services:
       - MONSTACHE_MONGO_URL=mongodb://${MONGO_USER:-arkhn}:${MONGO_PASSWORD}@${MONGO_HOST:-mongo}:${MONGO_PORT:-27017}
       - MONSTACHE_ES_URLS=http://${ELASTIC_HOST:-elasticsearch}:${ELASTIC_PORT:-9200}/
       - MONSTACHE_ES_USER=${ELASTIC_USER:-elastic}
-      - MONSTACHE_ES_PASSWORD=${ELASTIC_PASSWORD}
+      - MONSTACHE_ES_PASSWORD=${ES_PASSWORD}
       - MONSTACHE_DIRECT_READ_NS=fhirstore.Patient
       - MONSTACHE_CHANGE_STREAM_NS=fhirstore

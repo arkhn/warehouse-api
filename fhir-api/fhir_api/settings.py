@@ -10,7 +10,11 @@ DB_PORT = int(os.getenv("MONGO_PORT", 27017))
 DB_USER = os.getenv("MONGO_USER")
 DB_PASSWORD = os.getenv("MONGO_PASSWORD")
 
-ES_URL = os.getenv("ELASTIC_URL", "http://localhost:9200")
+ES_USERNAME = os.getenv("ES_USERNAME", "elastic")
+ES_PASSWORD = os.getenv("ES_PASSWORD")
+ES_HOST = os.getenv("ES_HOST", "localhost")
+ES_PORT = os.getenv("ES_PORT", 9200)
+ES_URL = f"http://{ES_USERNAME}{':'+ES_PASSWORD if ES_PASSWORD else ''}@{ES_HOST}:{ES_PORT}"
 
 AUTH_DISABLED = os.getenv("AUTH_DISABLED", "").lower() in ["1", "true", "yes"]
 
