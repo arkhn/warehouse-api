@@ -106,9 +106,13 @@ class BaseResource:
         self.id = None
         return res
 
-    def search(self, query_string=None, params=None) -> Union[Bundle, OperationOutcome]:
+    def search(
+        self, query_string=None, params=None, as_json=True
+    ) -> Union[Bundle, OperationOutcome]:
         """Searchs a resource by calling fhirstore search function"""
-        return self.db.search(self.resource_type, query_string=query_string, params=params)
+        return self.db.search(
+            self.resource_type, query_string=query_string, params=params, as_json=as_json
+        )
 
     def history(self):
         pass

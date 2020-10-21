@@ -1,7 +1,9 @@
 from unittest.mock import patch
 
+from multidict import MultiDict
 import pytest
 from fhir.resources.patient import Patient
+from fhir.resources.operationoutcome import OperationOutcome
 
 from fhir_api.errors import BadRequest
 from fhir_api.models.base import BaseResource
@@ -36,8 +38,7 @@ class TestResource:
     def test_init_without_id_nor_resource(self, mock_get_store):
         """Raises an error if no id nor resource are provided"""
         with pytest.raises(
-            BadRequest,
-            match="An id or a resource must be provided",
+            BadRequest, match="An id or a resource must be provided",
         ):
             BaseResource()
         assert mock_get_store.call_count == 0
@@ -146,8 +147,7 @@ class TestResource:
         r = BaseResource(id="1")
 
         with pytest.raises(
-            BadRequest,
-            match="Resource id and update payload do not match",
+            BadRequest, match="Resource id and update payload do not match",
         ):
             r = r.update({"id": "2"})
         assert mock_get_store.return_value.update.call_count == 0
@@ -157,8 +157,7 @@ class TestResource:
         r = BaseResource(id="1")
 
         with pytest.raises(
-            BadRequest,
-            match="Resource data is required to update a resource",
+            BadRequest, match="Resource data is required to update a resource",
         ):
             r = r.update(None)
         assert mock_get_store.return_value.update.call_count == 0
@@ -185,8 +184,7 @@ class TestResource:
         r = BaseResource(id="test")
 
         with pytest.raises(
-            BadRequest,
-            match="Patch data is required to patch a resource",
+            BadRequest, match="Patch data is required to patch a resource",
         ):
             r.patch(None)
         assert mock_get_store.return_value.patch.call_count == 0
@@ -198,8 +196,7 @@ class TestResource:
         r = BaseResource(resource=resource)
 
         with pytest.raises(
-            BadRequest,
-            match="Resource ID is required to patch a resource",
+            BadRequest, match="Resource ID is required to patch a resource",
         ):
             r.patch({"some": "patch"})
         assert mock_get_store.return_value.patch.call_count == 0
@@ -223,11 +220,88 @@ class TestResource:
         r = BaseResource(resource=resource)
 
         with pytest.raises(
-            BadRequest,
-            match="Resource ID is required to delete it",
+            BadRequest, match="Resource ID is required to delete it",
         ):
             r = r.delete()
         assert mock_get_store.return_value.update.call_count == 0
+
+    def test_search_qs(self, mock_get_store):
+        """
+        Calls the search method of the fhirstore client using `query_string`
+        """
+        resource = Patient(id="test")
+        mock_get_store.return_value.normalize_resource.return_value = resource
+        mock_get_store.return_value.search.return_value = resource
+        r = BaseResource(resource=resource)
+
+        res = r.search(query_string="name=Vincent")
+        assert res == resource
+
+        mock_get_store.return_value.search.assert_called_once_with(
+            "BaseResource", as_json=True, params=None, query_string="name=Vincent"
+        )
+        assert r.resource == resource
+        assert r.id == resource.id
+
+    def test_search_params(self, mock_get_store):
+        """
+        Calls the search method of the fhirstore client using `params`
+        """
+        resource = Patient(id="test")
+        mock_get_store.return_value.normalize_resource.return_value = resource
+        mock_get_store.return_value.search.return_value = resource
+        r = BaseResource(resource=resource)
+
+        params = MultiDict((("name", "Vincent"),))
+        res = r.search(params=params)
+        assert res == resource
+
+        mock_get_store.return_value.search.assert_called_once_with(
+            "BaseResource", as_json=True, params=params, query_string=None
+        )
+        assert r.resource == resource
+        assert r.id == resource.id
+
+    def test_search_as_fhir_resource(self, mock_get_store):
+        """
+        Calls the search method of the fhirstore client
+        with the as_json parameter.
+        """
+        resource = Patient(id="test")
+        mock_get_store.return_value.normalize_resource.return_value = resource
+        mock_get_store.return_value.search.return_value = "resource"
+        r = BaseResource(resource=resource)
+
+        res = r.search(query_string="name=Vincent", as_json=False)
+        assert res == "resource"
+
+        mock_get_store.return_value.search.assert_called_once_with(
+            "BaseResource", as_json=False, params=None, query_string="name=Vincent"
+        )
+        assert r.resource == resource
+        assert r.id == resource.id
+
+    def test_search_not_found(self, mock_get_store):
+        """
+        Calls the search method and handles the case
+        where no result is found.
+        """
+        resource = Patient(id="test")
+        error = OperationOutcome(
+            id="notfound", issue=[{"severity": "error", "code": "noop", "diagnostics": "bobo"}]
+        )
+        mock_get_store.return_value.normalize_resource.return_value = resource
+        mock_get_store.return_value.search.return_value = error
+        r = BaseResource(resource=resource)
+
+        res = r.search(query_string="name=NotFound")
+        assert res == error
+
+        mock_get_store.return_value.search.assert_called_once_with(
+            "BaseResource", as_json=True, params=None, query_string="name=NotFound"
+        )
+        assert r.resource == resource
+        assert r.id == resource.id
 
     @patch("fhir_api.models.base.jsonify")
     def test_json_with_resource(self, mock_jsonify, mock_get_store):

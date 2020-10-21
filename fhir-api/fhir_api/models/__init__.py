@@ -14,7 +14,7 @@ def init():
     global resources_models
     client = db.get_db_connection()[settings.DB_NAME]
     resource_list = client.list_collection_names()
-    logger.debug("List of supported resources:", resource_list)
+    logger.debug("List of supported resources: %s", resource_list)
     for r in resource_list:
         if hasattr(resources, r):
             # if a resource has a specific implementation, use it

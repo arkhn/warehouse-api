@@ -90,7 +90,7 @@ def delete(resource_type, id):
 def search(resource_type=None):
     # transform werkzeug.datastructures.ImmutableMultiDict to MultiDict
     params = MultiDict(request.args.items(multi=True))
-    return get_store().search(resource_type, params=params).json()
+    return get_store().search(resource_type, params=params, as_json=True)
 
 
 @api.route("/list-collections", methods=["GET"])
