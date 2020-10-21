@@ -10,7 +10,6 @@ Each maintain their own (but tied) software versioning, using namespaced tags to
 | `./fhir-api/` | FHIR server implementation | [semver](https://semver.org/) | `api/` (e.g. `api/v1.0.0`) |
 | `./front/`    | Web app                    | incrementing sequence         | `app/`  (e.g. `app/v1`)    |
 
-
 ## [Authors](CODEOWNERS)
 
 ## [License](LICENSE)
