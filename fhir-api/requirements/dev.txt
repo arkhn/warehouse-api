@@ -1,0 +1,3 @@
+-r tests.txt
+
+pre-commit==2.7.1

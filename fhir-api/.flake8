@@ -1,0 +1,5 @@
+[flake8]
+max-line-length = 100
+max-doc-length = 79
+exclude = tmp, migrations, front, .venv
+ignore = E203

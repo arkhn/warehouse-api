@@ -1,0 +1,68 @@
+# This compose file is not suited for production. It is intended for
+# development.
+#
+# Setting the environment should be done in the root dotenv file, to prevent
+# this file from appearing as modified in git. Variables are documented in the
+# dotenv file template.
+
+version: "3.7"
+
+services:
+  api:
+    image: fhir-api
+    build: .
+    restart: always
+    depends_on:
+      - elasticsearch
+      - mongo
+    ports:
+      - ${API_PORT:-2000}:2000
+    environment:
+      - MONGO_DB=${MONGO_DB:-fhirstore}
+      - MONGO_HOST=${MONGO_HOST:-mongo}
+      - MONGO_PORT=${MONGO_PORT:-27017}
+      - MONGO_USER=${MONGO_USER:-arkhn}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - ES_HOST=${ES_HOST:-elasticsearch}
+      - ES_PORT=${ES_PORT:-9200}
+      - ES_USERNAME=${ES_USERNAME:-elastic}
+      - ES_PASSWORD=${ES_PASSWORD}
+      - AUTH_DISABLED=${AUTH_DISABLED:-True}
+    volumes:
+      - ${DEFINITIONS_DIR:-./data/definitions}:/var/data/definitions
+      - ${DOCUMENTS_PATH:-./data/documents}:/var/data/documents
+
+  mongo:
+    image: mongo:4.2
+    restart: always
+    command: --replSet rs0 --quiet
+    ports:
+      - ${MONGO_PORT:-27017}:27017
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_DB:-fhirstore}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-arkhn}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.1
+    restart: always
+    environment:
+      - ELASTIC_USER=${ELASTIC_USER:-elastic}
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+      - discovery.type=single-node
+    ports:
+      - ${ELASTIC_PORT:-9200}:9200
+
+  monstache:
+    image: arkhn/monstache:6.6.0
+    restart: always
+    depends_on:
+      - elasticsearch
+      - mongo
+    environment:
+      - MONSTACHE_MONGO_URL=mongodb://${MONGO_USER:-arkhn}:${MONGO_PASSWORD}@${MONGO_HOST:-mongo}:${MONGO_PORT:-27017}
+      - MONSTACHE_ES_URLS=http://${ES_HOST:-elasticsearch}:${ES_PORT:-9200}/
+      - MONSTACHE_ES_USER=${ES_USER:-elastic}
+      - MONSTACHE_ES_PASS=${ES_PASSWORD}
+      - MONSTACHE_DIRECT_READ_NS=fhirstore.Patient
+      - MONSTACHE_CHANGE_STREAM_NS=fhirstore

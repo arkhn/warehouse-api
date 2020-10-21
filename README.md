@@ -1,84 +1,16 @@
-# warehouse-api
+# `fhir-api` monorepo
 
-** IN PROGRESS **
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-API of Arkhn's health data warehouse
+This is a monorepo containing both an api and a dedicated web app.
 
-## Building the services
+Each maintain their own (but tied) software versioning, using namespaced tags to mark releases.
+| directory     | content                    | versioning                    | tag namespace for release  |
+|---------------|----------------------------|-------------------------------|----------------------------|
+| `./fhir-api/` | FHIR server implementation | [semver](https://semver.org/) | `api/` (e.g. `api/v1.0.0`) |
+| `./front/`    | Web app                    | incrementing sequence         | `app/`  (e.g. `app/v1`)    |
 
-```bash
- docker-compose build
-```
 
-## Running the stack
+## [Authors](CODEOWNERS)
 
-```bash
-docker-compose up
-# wait for mongo to be up and running...
-env $(cat fhir-api/.env) fhir-api/scripts/initiate_rep_set.sh
-# Open your browser to http://localhost
-```
-
-## Usage
-
-### Create a resource
-
-`POST http://localhost/<resource_type>`
-
-`<resource_type>`: eg: Patient, Organization...
-
-`BODY`: resource data in JSON
-
-### Read a resource
-
-`GET http://localhost/<resource_type>/<id>`
-
-`<resource_type>`: eg: Patient, Organization...
-
-`<id>`: logical id of the resource
-
-### Update a resource
-
-`PUT http://localhost/<resource_type>/<id>`
-
-`<resource_type>`: eg: Patient, Organization...
-
-`<id>`: logical id of the resource
-
-`BODY`: resource data in JSON
-
-### Delete a resource
-
-`DELETE http://localhost/<resource_type>/<id>`
-
-`<resource_type>`: eg: Patient, Organization...
-
-`<id>`: logical id of the resource
-
-### Patch a resource (partial update)
-
-`PATCH http://localhost/<resource_type>`
-
-`<resource_type>`: eg: Patient, Organization...
-
-`<id>`: logical id of the resource
-
-`BODY`: patch data (partial resource) in JSON
-
-### Search a resource
-
-_Search is a work in progress, only works with strings right now_
-
-`GET http://localhost/<resource_type>?[parameter1=value1][&parameter2=value2]...`
-
-`<resource_type>`: eg: Patient, Organization...
-
-`<id>`: logical id of the resource
-
-`parameterN`: json path to search in the FHIR resource
-
-`valueN`: exact match of the extracted fhir attribute
-
-_Example (gets all patients)_: `GET http://localhost/Patient`
-
-_Example (gets a patient by family name)_: `GET http://localhost/Patient?name.family=Bins636`
+## [License](LICENSE)

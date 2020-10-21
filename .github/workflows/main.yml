@@ -1,59 +1,94 @@
 name: fhir-api
 
-on: [push]
+on:
+  push:
+    paths:
+      - "fhir-api/**"
 
 jobs:
-  build:
-    name: Lint and test
+  lint:
     runs-on: ubuntu-18.04
 
     steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: '3.7'
-      - name: Install dependencies
-        run: |
-          cd fhir-api
+          python-version: 3.8
+      - run: |
           python -m pip install --upgrade pip
-          sudo apt-get update
-          sudo apt-get install build-essential libpoppler-cpp-dev pkg-config python-dev
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 fhir-api --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 fhir-api --count --max-complexity=10 --max-line-length=100 --statistics
-      - name: Test with pytest
-        run: |
-          cd fhir-api
-          python -m pytest -svv tests/
+          pip install flake8
+      - run: |
+          flake8 fhir-api --config=fhir-api/.flake8 --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 fhir-api --config=fhir-api/.flake8 --count --max-complexity=10 --max-line-length=100 --statistics
 
-  publish:
-    name: Build and publish
-    env:
-      GITHUB_REGISTRY: docker.pkg.github.com
-      IMAGE: arkhn/fhir-api
-      TAG: latest
+  build:
+    needs: lint
     runs-on: ubuntu-18.04
-    needs: build
-    if: github.ref == 'refs/heads/master'
+
+    outputs:
+      tags: ${{ steps.metadata.outputs.tags }}
+
     steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python
-        uses: actions/setup-python@v1
+      - id: metadata
+        run: |
+          IMAGE=arkhn/fhir-api
+          # Always tag with first 8 of sha
+          TAGS="${IMAGE}:${GITHUB_SHA::8}"
+
+          # Has this workflow been triggered by an api tag ?
+          if [[ "${GITHUB_REF}" == refs/tags/api/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/api/}
+
+            # Is the tag on master and does it follow numeric versioning ?
+            if [[ "${{ github.event.base_ref }}" == refs/heads/master ]] && [[ "${VERSION}" =~ ^v[0-9]{1,3}(\.[0-9]{1,3}(\.[0-9]{1,3})?)?$ ]]; then
+              TAGS="${TAGS},${IMAGE}:latest"
+            fi
+
+          # Has this workflow been triggered by a branch ?
+          elif [[ "${GITHUB_REF}" == refs/heads/* ]]; then
+            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+          fi
+
+          if [[ ! -z "${VERSION}" ]]; then
+            TAGS="${TAGS},${IMAGE}:${VERSION}"
+          fi
+
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
         with:
-          python-version: '3.7'
-      - name: Build
-        run: docker build -t $IMAGE:$TAG -f fhir-api/Dockerfile fhir-api/
-      - name: Publish to the docker hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
-          docker push $IMAGE:$TAG
-      - name: Publish to Github Packages
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login $GITHUB_REGISTRY -u ${{ github.actor }} --password-stdin
-          docker tag $IMAGE:$TAG $GITHUB_REGISTRY/${{ github.repository }}/fhir-api:$TAG
-          docker push $GITHUB_REGISTRY/${{ github.repository }}/fhir-api:$TAG
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: docker/build-push-action@v2
+        with:
+          context: fhir-api
+          file: ./fhir-api/Dockerfile
+          build-args: |
+            VERSION_NAME=${{ steps.metadata.outputs.version }}
+            VERSION_SHA=${GITHUB_SHA::8}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: |
+            com.arkhn.image.title=fhir-api
+            com.arkhn.image.description=${{ github.event.repository.description }}
+            com.arkhn.image.url=${{ github.event.repository.html_url }}
+            com.arkhn.image.source=${{ github.event.repository.clone_url }}
+            com.arkhn.image.version=${{ steps.metadata.outputs.version }}
+            com.arkhn.image.created=${{ steps.metadata.outputs.created }}
+            com.arkhn.image.revision=${{ github.sha }}
+            com.arkhn.image.licenses=${{ github.event.repository.license.spdx_id }}
+
+  tests:
+    needs: build
+    runs-on: ubuntu-18.04
+
+    steps:
+      - run: |
+          IMAGE=$(echo ${{ needs.build.outputs.tags }} | cut -f1 -d,)
+          docker pull ${IMAGE}
+          docker run --entrypoint=pytest ${IMAGE}
