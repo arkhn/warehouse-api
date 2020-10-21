@@ -35,7 +35,7 @@ jobs:
           # Always tag with first 8 of sha
           TAGS="${IMAGE}:${GITHUB_SHA::8}"
 
-          # Has this workflow been triggered by an app tag ?
+          # Has this workflow been triggered by an api tag ?
           if [[ "${GITHUB_REF}" == refs/tags/api/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/api/}
 
