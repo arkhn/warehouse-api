@@ -70,7 +70,7 @@ Each image will have one or more docker tags, depending on the context:
   - the first 8 chars of the targetted commit hash,
   - the branch name, with `/` replaced by `-`. For instance the branch `jd/fix/1` will have the `jd-fix-1` tag on DockerHub.
 - on `master`, images have **additional** tags:
-  - the version, only if the push is a tag (i.e. `git push --tags api/<version>`),
+  - the version, only if the push is a tag (i.e. `git push --tags api/vX.Y.Z`),
   - the `latest` tag, for the most recent pushed tag.
 
 ## Versioning of `fhir-api`
@@ -83,7 +83,7 @@ The api must follow a [**semantic versioning**](https://semver.org/).
 
         git tags api/vX.Y.Z [<commit-sha>]
 
-Tags for the `fhir-api` should be prefixed with `api`. For instance, use `api/v1.1.0` if you want to publish the `v1.1.0` version of the `fhir-api` on DockerHub.
+Tags for the `fhir-api` should be prefixed with `api/v`. For instance, use `api/v1.1.0` if you want to publish the `1.1.0` version of the `fhir-api` on DockerHub.
 
 ### 2. Push the tag
 
