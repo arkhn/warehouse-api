@@ -36,6 +36,18 @@ app = create_app()
 
 
 @app.cli.command()
+def bootstrap():
+    """Bootstrap mongo collections and elasticsearch indices"""
+    store = db.get_store()
+    if not store.initialized:
+        logging.info("Bootstrapping store...")
+        store.bootstrap()
+        logging.info("Done!")
+    else:
+        logging.info("Store is already initialized, skipping.")
+
+
+@app.cli.command()
 @click.argument("src-dir", type=click.Path(exists=True))
 def load_defs(src_dir):
     """Load FHIR definitions.
