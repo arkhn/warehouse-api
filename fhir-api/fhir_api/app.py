@@ -5,8 +5,11 @@ import click
 from bson import ObjectId
 from flask import Flask, json
 
+from fhirpath.enums import FHIR_VERSION
+
 from fhir_api import db, models
 from fhir_api.api import api
+from fhir_api.utils import write_es_mappings
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -70,3 +73,12 @@ def rebuild_es_index():
 
     logging.info("Rebuilding ES index...")
     store.search_engine.create_es_index()
+
+
+@app.cli.command()
+@click.argument("dest-dir", type=click.Path(exists=True))
+def generate_es_mappings(dest_dir):
+    mappings = write_es_mappings(FHIR_VERSION.R4, dest_dir)
+    click.echo(
+        f"Total {len(mappings)} files have been written to {dest_dir}", color=click.style("green"),
+    )
