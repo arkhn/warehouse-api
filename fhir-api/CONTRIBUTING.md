@@ -81,13 +81,13 @@ The api must follow a [**semantic versioning**](https://semver.org/).
 
 ### 1. Tag the target commit (on `master`)
 
-        git tags api/vX.Y.Z [<commit-sha>]
+        git tag api/vX.Y.Z [<commit-sha>]
 
 Tags for the `fhir-api` should be prefixed with `api/v`. For instance, use `api/v1.1.0` if you want to publish the `1.1.0` version of the `fhir-api` on DockerHub.
 
 ### 2. Push the tag
 
-        git push --tags api/vX.Y.Z
+        git push origin api/vX.Y.Z
 
 Providing that the CI workflow is successful (which should always be the case on `master`...), a new image will soon be available on DockerHub with the specified tag.
 
