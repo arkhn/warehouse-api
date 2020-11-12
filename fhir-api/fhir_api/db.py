@@ -28,6 +28,13 @@ def get_db_connection():
             username=settings.DB_USER,
             password=settings.DB_PASSWORD,
         )
+
+        # initiate the mongo replica set if needed (required by monstache)
+        try:
+            connection.admin.command("replSetGetStatus")
+        except pymongo.errors.OperationFailure:
+            connection.admin.command("replSetInitiate", {})
+
     return connection
 
 
@@ -50,6 +57,4 @@ def get_store():
     connection_es = get_es_connection()
     if not store:
         store = fhirstore.FHIRStore(connection, connection_es, settings.DB_NAME)
-        if not store.initialized:
-            store.bootstrap()
     return store
