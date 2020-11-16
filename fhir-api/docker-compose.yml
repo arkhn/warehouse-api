@@ -30,7 +30,7 @@ services:
   api-load-defs:
     image: fhir-api
     build: .
-    entrypoint: ["flask", "load-defs" , "/var/data/definitions"]
+    entrypoint: ["flask", "load-defs", "/var/data/definitions"]
     restart: on-failure
     depends_on:
       - elasticsearch

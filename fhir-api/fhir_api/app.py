@@ -3,9 +3,8 @@ import logging
 
 import click
 from bson import ObjectId
-from flask import Flask, json
-
 from fhirpath.enums import FHIR_VERSION
+from flask import Flask, json
 
 from fhir_api import db, models
 from fhir_api.api import api
@@ -92,5 +91,6 @@ def rebuild_es_index():
 def generate_es_mappings(dest_dir):
     mappings = write_es_mappings(FHIR_VERSION.R4, dest_dir)
     click.echo(
-        f"Total {len(mappings)} files have been written to {dest_dir}", color=click.style("green"),
+        f"Total {len(mappings)} files have been written to {dest_dir}",
+        color=click.style("green"),
     )
