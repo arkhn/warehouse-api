@@ -83,9 +83,8 @@ services:
 
   mongo:
     image: mongo:4.2
-    restart: always
+    restart: on-failure
     command: --replSet rs0 --quiet
-    hostname: mongo
     ports:
       - ${MONGO_PORT:-27017}:27017
     environment:
@@ -95,7 +94,7 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.7.1
-    restart: always
+    restart: on-failure
     environment:
       - ELASTIC_USER=${ELASTIC_USER:-elastic}
       - ELASTIC_PASSWORD=${ES_PASSWORD}
@@ -105,7 +104,7 @@ services:
 
   monstache:
     image: arkhn/monstache:6.7.0
-    restart: always
+    restart: on-failure
     depends_on:
       - elasticsearch
       - mongo
