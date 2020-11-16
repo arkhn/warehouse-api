@@ -71,6 +71,16 @@ services:
     volumes:
       - ${DOCUMENTS_PATH:-./data/documents}:/var/data/documents
 
+  mongo-initiate-rs:
+    image: mongo:4.2
+    restart: on-failure
+    depends_on:
+      - mongo
+    entrypoint:
+      ["sh", "-c", 'mongo "$${MONGO_CONNECTION_URI}" --eval "rs.initiate()"']
+    environment:
+      - MONGO_CONNECTION_URI=mongodb://${MONGO_USER:-arkhn}:${MONGO_PASSWORD}@mongo
+
   mongo:
     image: mongo:4.2
     restart: always
