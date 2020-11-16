@@ -29,12 +29,6 @@ def get_db_connection():
             password=settings.DB_PASSWORD,
         )
 
-        # initiate the mongo replica set if needed (required by monstache)
-        try:
-            connection.admin.command("replSetGetStatus")
-        except pymongo.errors.OperationFailure:
-            connection.admin.command("replSetInitiate", {})
-
     return connection
 
 
