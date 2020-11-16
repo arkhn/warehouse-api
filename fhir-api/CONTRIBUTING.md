@@ -15,14 +15,18 @@
         MONGO_PASSWORD=whatever
         ES_PASSWORD=whatever
 
-2.  Deploy stateful services (mongo, elasticsearch) and the bootstrap task
+2.  Start infrastructure services
 
         # In the root directory of this repo
-        docker-compose up -d mongo elasticsearch monstache api-bootstrap
+        docker-compose up -d mongo mongo-initiate-rs elasticsearch monstache
 
-3.  Once the bootstrap task completed (a few seconds, up to 1 minute), deploy the remaining services
+3.  Bootstrap definitions
 
-        docker-compose up -d
+        docker-compose up -d api-bootstrap
+
+4.  Start remaining services
+
+        docker-compose up -d api-load-defs api
 
 ## Local development
 
