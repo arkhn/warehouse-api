@@ -28,6 +28,7 @@ def get_db_connection():
             username=settings.DB_USER,
             password=settings.DB_PASSWORD,
         )
+
     return connection
 
 
@@ -50,6 +51,4 @@ def get_store():
     connection_es = get_es_connection()
     if not store:
         store = fhirstore.FHIRStore(connection, connection_es, settings.DB_NAME)
-        if not store.initialized:
-            store.bootstrap()
     return store

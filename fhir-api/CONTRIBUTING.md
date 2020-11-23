@@ -15,18 +15,18 @@
         MONGO_PASSWORD=whatever
         ES_PASSWORD=whatever
 
-2.  Deploy mongo
+2.  Start infrastructure services
 
         # In the root directory of this repo
-        docker-compose up -d mongo
+        docker-compose up -d mongo mongo-initiate-rs elasticsearch monstache
 
-3.  Once mongo's up (a few seconds), initiate the replica set
+3.  Bootstrap definitions
 
-        docker-compose exec mongo mongo -u ${MONGO_USER:-arkhn} -p ${MONGO_PASSWORD:-whatever} --eval "rs.initiate()"
+        docker-compose up -d api-bootstrap
 
-4.  Deploy the remaining of the stack
+4.  Start remaining services
 
-        docker-compose up -d
+        docker-compose up -d api-load-defs api
 
 ## Local development
 

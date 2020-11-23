@@ -1,9 +1,9 @@
 from unittest.mock import patch
 
-from multidict import MultiDict
 import pytest
-from fhir.resources.patient import Patient
 from fhir.resources.operationoutcome import OperationOutcome
+from fhir.resources.patient import Patient
+from multidict import MultiDict
 
 from fhir_api.errors import BadRequest
 from fhir_api.models.base import BaseResource
@@ -38,7 +38,8 @@ class TestResource:
     def test_init_without_id_nor_resource(self, mock_get_store):
         """Raises an error if no id nor resource are provided"""
         with pytest.raises(
-            BadRequest, match="An id or a resource must be provided",
+            BadRequest,
+            match="An id or a resource must be provided",
         ):
             BaseResource()
         assert mock_get_store.call_count == 0
@@ -147,7 +148,8 @@ class TestResource:
         r = BaseResource(id="1")
 
         with pytest.raises(
-            BadRequest, match="Resource id and update payload do not match",
+            BadRequest,
+            match="Resource id and update payload do not match",
         ):
             r = r.update({"id": "2"})
         assert mock_get_store.return_value.update.call_count == 0
@@ -157,7 +159,8 @@ class TestResource:
         r = BaseResource(id="1")
 
         with pytest.raises(
-            BadRequest, match="Resource data is required to update a resource",
+            BadRequest,
+            match="Resource data is required to update a resource",
         ):
             r = r.update(None)
         assert mock_get_store.return_value.update.call_count == 0
@@ -184,7 +187,8 @@ class TestResource:
         r = BaseResource(id="test")
 
         with pytest.raises(
-            BadRequest, match="Patch data is required to patch a resource",
+            BadRequest,
+            match="Patch data is required to patch a resource",
         ):
             r.patch(None)
         assert mock_get_store.return_value.patch.call_count == 0
@@ -196,7 +200,8 @@ class TestResource:
         r = BaseResource(resource=resource)
 
         with pytest.raises(
-            BadRequest, match="Resource ID is required to patch a resource",
+            BadRequest,
+            match="Resource ID is required to patch a resource",
         ):
             r.patch({"some": "patch"})
         assert mock_get_store.return_value.patch.call_count == 0
@@ -220,7 +225,8 @@ class TestResource:
         r = BaseResource(resource=resource)
 
         with pytest.raises(
-            BadRequest, match="Resource ID is required to delete it",
+            BadRequest,
+            match="Resource ID is required to delete it",
         ):
             r = r.delete()
         assert mock_get_store.return_value.update.call_count == 0
