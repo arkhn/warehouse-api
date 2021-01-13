@@ -84,7 +84,9 @@ const Search = (): React.ReactElement => {
     setIsLoading(true);
     let responseBundle: any;
     try {
-      const response: any = await axios.get(fhirUrl);
+      const url = new URL(fhirUrl);
+      url.search = encodeURIComponent(url.search.substring(1));
+      const response: any = await axios.get(url.toString());
       responseBundle = response.data;
     } catch (err) {
       const errMessage = err.response ? err.response.data : err.message;
@@ -137,7 +139,10 @@ const Search = (): React.ReactElement => {
             }}
           />
           <SearchParameterTable type={selectedCollection} />
-          <SearchBar selectedCollection={selectedCollection} executeFhirQuery={executeFhirQuery}/>
+          <SearchBar
+            selectedCollection={selectedCollection}
+            executeFhirQuery={executeFhirQuery}
+          />
           {apiErrors.length > 0 &&
             apiErrors.map((apiError) => (
               <Alert severity="error" className={classes.alertError}>
