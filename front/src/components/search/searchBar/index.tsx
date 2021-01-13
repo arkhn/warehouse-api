@@ -53,13 +53,13 @@ const SearchBar = ({
     (state: IReduxStore) => state
   );
 
-  const [fhirUrl, setfFhirUrl] = useState('');
+  const [fhirUrl, setFhirUrl] = useState('');
 
   useEffect(() => {
     const searchUrl = searchParameters
       .filter((param) => param.parameter && param.value)
       .map((param) => `${param.parameter}=${param.value}`);
-    setfFhirUrl(
+    setFhirUrl(
       `${FHIR_API_URL}${selectedCollection ? '/' + selectedCollection : ''}${
         searchUrl.length > 0 ? '?' + searchUrl.join('&') : ''
       }`
@@ -77,9 +77,9 @@ const SearchBar = ({
         forcePopupIcon={true}
         popupIcon={<HistoryIcon />}
         value={fhirUrl}
-        onChange={(_: any, value: string | null) => setfFhirUrl(value || '')}
+        onChange={(_: any, value: string | null) => setFhirUrl(value || '')}
         onInputChange={(_: any, value: string | null) =>
-          setfFhirUrl(value || '')
+          setFhirUrl(value || '')
         }
         ListboxProps={{
           className: classes.searchBarDropdown,
