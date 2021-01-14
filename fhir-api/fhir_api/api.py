@@ -87,7 +87,9 @@ def delete(resource_type, id):
 @api.route("/<resource_type>", methods=["GET"])
 @auth_required
 def search(resource_type=None):
-    return get_store().search(resource_type, query_string=request.query_string, as_json=True)
+    return get_store().search(
+        resource_type, query_string=request.query_string.decode("utf-8"), as_json=True
+    )
 
 
 @api.route("/list-collections", methods=["GET"])
